@@ -1,0 +1,62 @@
+units:
+  meters: 10.0
+  seconds: 1.0
+  kilograms: 10.0
+timestep: 0.0005
+n_iterations: 10001
+play: false
+rtl: 1.0
+fast: false
+headless: false
+show_progress: false
+
+gravity: !!python/tuple
+- 0
+- 0
+- -9.81
+
+# Camera
+zoom: 1
+free_camera: false
+top_camera: false
+rotating_camera: false
+video: False
+video_fps: 30
+video_speed: 1.0
+video_name: animation
+video_yaw: 0      # 30 0
+video_pitch: 90   # 45 90
+video_distance: 0.15
+video_offset: !!python/tuple
+- -0.05
+- 0
+- 0
+video_filter: null
+video_resolution: !!python/tuple
+- 1280 # - 1280
+- 720  # - 1440
+
+texture_repeat: 5
+shadow_size   : 1024 #32768 # 32 * 1024
+
+# Solver
+num_sub_steps: 5
+n_solver_iters: 10000
+residual_threshold: 1.0e-16
+visual_scale: 1.0
+cone: elliptic
+solver: Newton
+integrator: implicit
+impratio: 10.0
+ccd_iterations: 10000
+ccd_tolerance: 1.0e-16
+noslip_iterations: 0
+noslip_tolerance: 1.0e-16
+opengl2: false
+lcp: si
+cfm: 0
+erp: 0
+contact_erp: 0
+friction_erp: 0
+max_num_cmd_per_1ms: 1000000000
+report_solver_analytics: 0

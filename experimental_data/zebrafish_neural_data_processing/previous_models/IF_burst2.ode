@@ -1,0 +1,42 @@
+
+p C=10, R=0.5, alpha=1, delta_t=2, Iext=100
+p v_rest=-70, tau_w=100, a_gain=-0.5, b_gain=7, v_reset=-46, v_rh=-50, v_th=30
+tau_m=5
+
+p g_na=0, E_na=50
+p v_12_h=-48, kh=6, tau=10000
+p v_12_m=-40, km=-6
+p tau0=200, tau_max=160
+
+finf(v,v12,k) = 1/(1+exp((v-v12)/k))
+tau_h(v,v12,k) = tau0+(tau_max-tau0)/cosh((v-v12)/k)
+
+#tau_h(v,v12,k) = tau/cosh((v-v12)/k)
+
+init w=0, v=-40, h=0
+
+i_naP(v,h) = g_na * finf(v, v_12_m, km) * h * (v-E_na)
+i_tot=Iext-alpha*w
+#-i_naP(v,h)
+
+dv/dt=((v_rest-v)+delta_t*exp((v-v_rh)/delta_t)+R*i_tot)/tau_m
+dw/dt=(a_gain*(v-v_rest)-w)/tau_w
+dh/dt=(finf(v,v_12_h,kh)-h)/tau_h(v,v_12_h,2*kh)
+
+global 1 {v-v_th} {v=v_reset; w=w+b_gain}
+
+
+# ===== PLOTTING =====
+@ meth=rk, DT=0.001, TOTAL=100, MAXSTOR=1000, BOUND=600000, tol=1e-6, atol=1e-6
+@ XLO=0, XHI=100, YLO=-100, YHI=40
+@ nplot=3
+@ xp=t,yp=v
+@ xp2=t,yp2=w
+@ xp3=t,yp3=h
+
+
+#@ XLO=-70, XHI=20, YLO=0, YHI=1
+#@ nplot=1
+#@ xp=v,yp=h
+
+

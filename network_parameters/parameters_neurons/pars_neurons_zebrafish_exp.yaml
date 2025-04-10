@@ -1,0 +1,174 @@
+# Neural model parameters
+neuron_type_network   : adex_if
+neuron_type_muscle    : muscle
+synaptic_labels       : [ampa, nmda, glyc]
+n_adaptation_variables: 1
+
+# Common neuronal parameters: Equal values in all the populations
+shared_neural_params :
+
+    # Locomotor network
+    -   neuron_group : 0
+        std_val      : [     0.2,  '']
+        w_ampa       : [  0.0020,  '']   # 0.0125
+        w_nmda       : [  0.0020,  '']   # 0.0125
+        w_glyc       : [  0.0050,  '']   # 0.0250
+
+    # Muscle cells
+    -   neuron_group : 1
+        tau_mc_act   : [ 20.0,  ms]
+        tau_mc_deact : [ 20.0,  ms]
+        w_ampa       : [ 0.35,  '']
+        w_nmda       : [ 0.15,  '']
+        w_glyc       : [ 1.00,  '']
+
+# Variable parameters: population-dependent values or values modified during execution
+# Measurement units of internal variables that are dynamically modified
+variable_neural_params_units :
+
+    -   neuron_group : 0
+
+        t_refr   : second
+        tau_memb : second
+        R_memb   : ohm
+
+        V_rest   : volt
+        V_thres  : volt
+        V_reset  : volt
+
+        exp_term : 1
+        V_rh     : volt
+        delta_t  : volt
+
+        tau1     : second
+        delta_w1 : ampere
+        a_gain1  : siemens
+
+variable_neural_params_list :
+
+    # Axial neurons
+    -   mod_name : cpg.axial.ex.V2a
+        t_refr   : [       5.00,  msecond]
+        tau_memb : [      10.00,  msecond]
+        R_memb   : [ [100, 900],     Mohm]
+
+        V_rest   : [ [-64, -56],       mV] # Imitate voltage clamp: [ [-50, -46], mV]
+        V_thres  : [        -20,       mV]
+        V_reset  : [      -32.5,       mV]
+
+        exp_term : [          1,       '']
+        V_rh     : [ [-41, -36],       mV]
+        delta_t  : [          5,       mV]
+
+        ## CORRECT ONES
+        tau1     : [       500,  msecond]  # [[400, 600],  msecond]
+        delta_w1 : [      10.0,       pA]  # 10.0
+        a_gain1  : [       0.1, nsiemens]  # 0.1
+
+        # tau1     : [       500,  msecond]  # [[400, 600],  msecond]
+        # delta_w1 : [      10.0,       pA]  # 10.0
+        # a_gain1  : [       0.2, nsiemens]  # 0.1
+
+
+        sigma   : [       0,       mV]
+
+    -   mod_name : cpg.axial.in.V0d
+        t_refr   : [       2.00,  msecond]
+        tau_memb : [      10.00,  msecond]
+        R_memb   : [ [200, 300],     Mohm]
+
+        V_rest   : [[-64, -60],       mV]
+        V_thres  : [     -20.0,       mV]
+        V_reset  : [     -40.5,       mV]
+
+        exp_term : [         1,       '']
+        V_rh     : [[-46, -40],       mV]
+        delta_t  : [       5.0,       mV]
+
+        tau1     : [       700,  msecond] # [[600, 800],  msecond]
+        delta_w1 : [      13.0,       pA]
+        a_gain1  : [       0.5, nsiemens]
+
+        sigma   : [       0,       mV]
+
+    # Reticulospinal neurons
+    -   mod_name: rs
+        t_refr  : [    5.00,      ms]
+        tau_memb: [[  26.8],      ms]
+        R_memb  : [[  16.0],    Gohm]
+
+        V_rest  : [   -70.0,      mV]
+        V_reset : [   -70.0,      mV]
+        V_thres : [   -38.0,      mV]
+
+        exp_term : [      0,       '']  ## LIF NEURON
+        delta_t  : [     10,       mV]  ##
+        V_rh     : [  -50.0,       mV]  ##
+
+        tau1    : [    30.0,       ms]  ##
+        delta_w1: [     0.0,     pamp]  ##
+        a_gain1  : [    0.0, nsiemens]  ##
+
+        sigma   : [       0,       mV]
+
+    # Motor neurons
+    # -   mod_name: mn
+    #     t_refr  : [         5.00,   ms]
+    #     tau_memb: [[ 18.0, 22.0],   ms]   # [26.8]
+    #     R_memb  : [[  0.9,  1.1], Gohm]   # [16.0]
+
+    #     V_rest  : [   -70.0,      mV]
+    #     V_reset : [   -70.0,      mV]
+    #     V_thres : [   -38.0,      mV]
+
+    #     exp_term : [      0,       '']  ## LIF NEURON
+    #     delta_t  : [     10,       mV]  ##
+    #     V_rh     : [  -50.0,       mV]  ##
+
+    #     tau1    : [    30.0,       ms]  ##
+    #     delta_w1: [     0.0,     pamp]  ##
+    #     a_gain1  : [    0.0, nsiemens]  ##
+
+    #     sigma   : [       0,       mV]
+
+    -   mod_name: mn
+        t_refr   : [       5.00,  msecond]
+        tau_memb : [      10.00,  msecond]
+        R_memb   : [ [200, 300],     Mohm] # From Gabriel et al. 2011 (R_memb)
+
+        V_rest   : [ [-57, -55],       mV] # From Gabriel et al. 2011 (I rheobase)
+        V_thres  : [        -20,       mV] # From Gabriel et al. 2011 (spike amp)
+        V_reset  : [        -38,       mV] # From Gabriel et al. 2011 (after spike HP)
+
+        exp_term : [         1,        '']
+        V_rh     : [[-43, -41],        mV] # From Gabriel et al. 2011 (spike threshold)
+        delta_t  : [         5,        mV]
+
+        tau1     : [       150,   msecond]
+        delta_w1 : [      14.0,        pA]
+        a_gain1  : [       2.0,  nsiemens]
+
+        sigma    : [         0,        mV]
+
+    # Propriosensory neurons
+    -   mod_name: ps
+        t_refr  : [      5.00,      ms]
+        tau_memb: [[ 14,  16],      ms] # [ 10,  20]
+        R_memb  : [[140, 160],    Mohm] # [100, 200]
+
+        V_rest  : [[-58, -57],      mV] # [-60, -55]
+        V_reset : [     -80.0,      mV]
+        V_thres : [[-43, -42],      mV] # [-45, -40]
+
+        exp_term : [      0,       '']  ## LIF NEURON
+        delta_t  : [     10,       mV]  ##
+        V_rh     : [  -50.0,       mV]  ##
+
+        tau1    : [    50.0,       ms]  ##
+        delta_w1: [     0.0,     pamp]  ## 5 to make it adaptive
+        a_gain1  : [    0.0, nsiemens]  ##
+
+        sigma   : [       0,       mV]
+
+    # Exterosensory neurons
+    # None

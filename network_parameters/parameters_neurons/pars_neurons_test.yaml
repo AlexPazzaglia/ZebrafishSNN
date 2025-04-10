@@ -1,0 +1,125 @@
+# Neural model parameters
+neuron_type_network   : ad_if
+neuron_type_muscle    : muscle
+synaptic_labels       : [ampa, nmda, glyc]
+n_adaptation_variables: 2
+
+# Common neuronal parameters: Equal values in all the populations
+shared_neural_params :
+
+    # Locomotor network
+    -   neuron_group : 0
+        V_rest       : [-70.0, mV]
+        V_reset      : [-70.0, mV]
+        V_thres      : [-38.0, mV]
+        std_val      : [  0.2, '']
+
+    # Muscle cells
+    -   neuron_group : 1
+        tau_mc_act   : [10.0,  ms]
+        tau_mc_deact : [40.0,  ms]
+        w_ampa       : [0.60,  '']
+        w_nmda       : [0.15,  '']
+        w_glyc       : [1.00,  '']
+
+# Variable parameters: population-dependent values or values modified during execution
+# Measurement units of internal variables that are dynamically modified
+variable_neural_params_units :
+
+    -   neuron_group : 0
+
+        t_refr   : second
+        tau_memb : second
+        R_memb   : ohm
+
+        tau1     : second
+        tau2     : second
+        delta_w1 : ampere
+        delta_w2 : ampere
+
+        w_ampa   : 1
+        w_nmda   : 1
+        w_glyc   : 1
+
+variable_neural_params_list :
+
+    # Axial neurons
+    -   mod_name : cpg.axial
+        t_refr   : [    5.00,  ms]
+        tau_memb : [[ 26.8],   ms]
+        R_memb   : [[ 16.0], Gohm]
+
+        tau1     : [[150.0],   ms]
+        tau2     : [[300.0],   ms]
+        delta_w1 : [   0.50, pamp]
+        delta_w2 : [   0.00, pamp]
+
+        w_ampa   : [   0.07,   '']
+        w_nmda   : [   0.02,   '']
+        w_glyc   : [   0.11,   '']
+        sigma    : [      0,   mV]
+
+    # Limb parameters
+    -   mod_name : cpg.limb
+        t_refr   : [    5.00,   ms]
+        tau_memb : [[  37.5],   ms]
+        R_memb   : [[  21.0], Gohm]
+
+        tau1     : [[ 500.0],   ms]
+        tau2     : [[4000.0],   ms]
+        delta_w1 : [    0.07, pamp]
+        delta_w2 : [    0.01, pamp]
+
+        w_ampa   : [    0.10,   '']
+        w_nmda   : [    0.03,   '']
+        w_glyc   : [    0.15,   '']
+        sigma    : [      0,    mV]
+
+    # Reticulospinal neurons
+    -   mod_name : rs
+        t_refr   : [    5.00,   ms]
+        tau_memb : [[  26.8],   ms]
+        R_memb   : [[  16.0], Gohm]
+
+        tau1     : [[ 150.0],   ms]
+        tau2     : [[2000.0],   ms]
+        delta_w1 : [    0.50, pamp]
+        delta_w2 : [    0.01, pamp]
+
+        w_ampa   : [    0.07,   '']
+        w_nmda   : [    0.02,   '']
+        w_glyc   : [    0.11,   '']
+        sigma    : [      0,    mV]
+
+    # Motor neurons
+    -   mod_name : mn
+        t_refr   : [    5.00,   ms]
+        tau_memb : [[  26.8],   ms]
+        R_memb   : [[  16.0], Gohm]
+
+        tau1     : [[ 150.0],   ms]
+        tau2     : [[2000.0],   ms]
+        delta_w1 : [    0.00, pamp]
+        delta_w2 : [    0.00, pamp]
+
+        w_ampa   : [    0.07,   '']
+        w_nmda   : [    0.02,   '']
+        w_glyc   : [    0.11,   '']
+        sigma    : [      0,    mV]
+
+    # Propriosensory neurons
+    -   mod_name : ps
+        t_refr   : [    5.00,   ms]
+        tau_memb : [[  26.8],   ms]
+        R_memb   : [[  16.0], Gohm]
+
+        tau1     : [[ 150.0],   ms]
+        tau2     : [[2000.0],   ms]
+        delta_w1 : [    0.00, pamp]
+        delta_w2 : [    0.00, pamp]
+
+        w_ampa   : [    0.07,   '']
+        w_nmda   : [    0.02,   '']
+        w_glyc   : [    0.11,   '']
+        sigma    : [      0,    mV]
+

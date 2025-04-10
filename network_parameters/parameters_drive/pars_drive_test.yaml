@@ -1,0 +1,139 @@
+limb_connectivity_schemes_with_drive_offset :
+ - reference
+ - modified
+
+lfac_max : 0.11
+dfac_max : 0.11
+
+drives:
+
+ - gait: swim
+   modes:
+    - feedback: Any
+      lfac      : False
+      dfac      : False
+      drives_axis:
+      - 4.162
+      - 3.64
+      - 3.64
+      - 4.162
+      - 3.64
+      - 3.64
+      drives_limbs:
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+
+ - gait: trot
+   modes:
+    - feedback   : noFB
+      lfac       : False
+      dfac       : False
+      drives_axis:
+      - 2.1
+      - 2.7
+      - 2.9
+      - 2.1
+      - 2.7
+      - 2.9
+      drives_limbs:
+      - 4.2
+      - 4.2
+      - 4.2
+      - 4.2
+
+    - feedback   : FB
+      lfac       : False
+      dfac       : False
+      drives_axis:
+      - 3.0
+      - 3.0
+      - 3.0
+      - 3.0
+      - 3.0
+      - 3.0
+      # drives_axis:
+      # - 1.8
+      # - 1.8
+      # - 2.7
+      # - 2.7
+      # - 2.8
+      # - 2.8
+      drives_limbs:
+      - 4.0
+      - 4.0
+      - 4.0
+      - 4.0
+
+ - gait: lat
+   modes:
+    - feedback   : Any
+      lfac       : True
+      dfac       : False
+      drives_axis:
+      - 2.1
+      - 2.7
+      - 2.9
+      - 2.1
+      - 2.7
+      - 2.9
+      drives_limbs:
+      - 4.2
+      - 4.2
+      - 4.2
+      - 4.2
+
+ - gait: diag
+   modes:
+    - feedback   : Any
+      lfac       : False
+      dfac       : True
+      drives_axis:
+      - 2.1
+      - 2.7
+      - 2.9
+      - 2.1
+      - 2.7
+      - 2.9
+      drives_limbs:
+      - 4.2
+      - 4.2
+      - 4.2
+      - 4.2
+
+ - gait : amble
+   modes:
+    - feedback   : Any
+      lfac       : False
+      dfac       : False
+      drives_axis:
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      drives_limbs:
+      - 4.0
+      - 4.0
+      - 4.0
+      - 4.0
+
+ - gait : caud2rost
+   modes:
+    - feedback   : Any
+      lfac       : False
+      dfac       : False
+      drives_axis:
+      - 2.8
+      - 3.4
+      - 4.0
+      - 2.8
+      - 3.4
+      - 4.0
+      drives_limbs:
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0

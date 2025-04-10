@@ -1,0 +1,52 @@
+mech_timestep     : 0.001
+mech_limbs        : 0
+mech_pca_joints   : 5
+mech_axial_joints : 15
+mech_limbs_joints : 0
+
+mech_joints_silenced: []            # DOFs that are silenced
+
+mech_lb_joints_lead : []            # Leader moving
+mech_lb_joints_foll : []            # Following the leader
+mech_lb_joints_free : []            # Autonomously moving
+mech_lb_joints_fixd : []            # Fixed position
+
+mech_lb_joints_swap : []            # DOFs with swapped flexor and extensor
+
+# Nominal gains for flexor and extensor of the different DOFs of the different limb pairs
+mech_lb_pairs_gains_mean_fe_lead : []
+mech_lb_pairs_gains_mean_fe_foll : []
+mech_lb_pairs_gains_mean_fe_free : []
+
+# Asymmetry of gains for flexor and extensor of the different DOFs of the different limb pairs
+mech_lb_pairs_gains_asym_fe_lead : []
+mech_lb_pairs_gains_asym_fe_foll : []
+mech_lb_pairs_gains_asym_fe_free : []
+
+# Delay between leader and follower
+mech_activation_delays : []
+
+# Motor offsets
+lb_offset_walk: []
+lb_offset_swim: []
+
+mech_axial_length: 0.018
+
+mech_axial_joints_position:
+- 0.003
+- 0.004
+- 0.005
+- 0.006
+- 0.007
+- 0.008
+- 0.009
+- 0.010
+- 0.011
+- 0.012
+- 0.013
+- 0.014
+- 0.015
+- 0.016
+- 0.017
+
+mech_limbs_joints_position: []

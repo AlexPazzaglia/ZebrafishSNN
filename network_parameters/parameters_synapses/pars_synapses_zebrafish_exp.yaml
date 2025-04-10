@@ -1,0 +1,149 @@
+# Temporal parameters
+synaptic_labels_ex      : [ampa, nmda]
+synaptic_labels_in      : [glyc]
+conduction_speed        : 100
+synaptic_delay_nominal  : 0.003
+synaptic_delay_muscle   : 0.003
+include_conduction_delay: False
+
+##############################################
+# SYNAPTIC MODEL PARAMETERS STORED IN NEURONS
+##############################################
+
+# Shared synaptic parameters stored in neurons
+shared_neural_syn_params :
+
+    # syn_ex
+    - synaptic_group     : 0
+      neuron_group_origin: 0
+      neuron_group_target: 0
+      E_ampa             : [0.0,   mV]
+      E_nmda             : [0.0,   mV]
+
+    # syn_in
+    - synaptic_group     : 1
+      neuron_group_origin: 0
+      neuron_group_target: 0
+      E_glyc             : [-85.0, mV] # -85.0 (-0.65)
+
+    # syn_mc_ex
+    - synaptic_group     : 2
+      neuron_group_origin: 0
+      neuron_group_target: 1
+      E_ampa             : [  1.0, '']
+      E_nmda             : [  1.0, '']
+      tau_ampa           : [  2.0, ms]
+      tau_nmda           : [ 10.0, ms]
+
+    # syn_mc_in
+    - synaptic_group     : 3
+      neuron_group_origin: 0
+      neuron_group_target: 1
+      E_glyc             : [0.0,  '']
+      tau_glyc           : [2.0,  ms]
+
+# Measurement units of variable synaptic parameters stored in neurons
+variable_neural_syn_params_units :
+
+    # syn_ex
+    - synaptic_group     : 0
+      neuron_group_origin: 0
+      neuron_group_target: 0
+      tau_ampa           : second
+      tau_nmda           : second
+
+    # syn_in
+    - synaptic_group     : 1
+      neuron_group_origin: 0
+      neuron_group_target: 0
+      tau_glyc           : second
+
+# Values of variable synaptic parameters stored in neurons
+variable_neural_syn_params :
+
+    # syn_ex
+    - synaptic_group     : 0
+      neuron_group_origin: 0
+      neuron_group_target: 0
+      tau_ampa           : [ 20.0, ms]
+      tau_nmda           : [ 20.0, ms]
+
+    # syn_in
+    - synaptic_group     : 1
+      neuron_group_origin: 0
+      neuron_group_target: 0
+      tau_glyc           : [20.0, ms]
+
+##############################################
+# SYNAPTIC MODEL PARAMETERS STORED IN SYNAPSES
+##############################################
+
+# Shared synaptic parameters stored in synapses
+shared_syn_params : []
+
+# Measurement units of variable synaptic parameters stored in synapses
+variable_syn_params_units : []
+
+# Values of variable synaptic parameters stored in synapses
+variable_syn_params : []
+
+##############################################
+# COMMON SYNAPTIC WEIGHTS
+##############################################
+# extra_cond : [[pool_id_pre, pool_id_post], pool_id_pre != pool_id_post]
+
+syn_weights_list :
+
+    # Intra-CPG
+    -   source_name : cpg.axial.ex
+        target_name : cpg.axial.ex
+        weight_ampa : [5.50, '']  # 1.00    ### 2.50
+        weight_nmda : [5.50, '']  # 1.00    ### 2.50
+
+    -   source_name : cpg.axial.ex
+        target_name : cpg.axial.in
+        weight_ampa : [30.00, '']  # 1.00   ### 30.00
+        weight_nmda : [30.00, '']  # 1.00   ### 30.00
+
+    -   source_name : cpg.axial.in
+        target_name : cpg.axial.ex
+        weight_glyc : [2.50, '']  # 1.25    ### 2.00
+
+    -   source_name : cpg.axial.in
+        target_name : cpg.axial.in
+        weight_glyc : [0.10, '']  # 1.25    ### 0.50
+
+    # RS2cpg
+    -   source_name : rs
+        target_name : cpg.axial.ex
+        weight_ampa : [10.00, ''] # 10.00    ### 10.00
+        weight_nmda : [10.00, ''] # 10.00    ### 10.00
+
+    -   source_name : rs
+        target_name : cpg.axial.in
+        weight_ampa : [0.30, ''] # 10.00    ### 0.00
+        weight_nmda : [0.30, ''] # 10.00    ### 0.00
+
+    # CPG2mn
+    -   source_name : cpg.axial.ex
+        target_name : mn
+        weight_ampa : [20.00, '']           ### 40.00
+        weight_nmda : [20.00, '']           ### 40.00
+
+    -   source_name : cpg.axial.in
+        target_name : mn
+        weight_glyc : [10.00, '']           ### 10.00
+
+    # PS2cpg
+    -   source_name : ps
+        target_name : cpg
+        weight_ampa : [50.00, '']
+        weight_nmda : [50.00, '']
+        weight_glyc : [50.00, '']
+
+    # MN2mc
+    -   source_name : mn
+        target_name : mc
+        weight_ampa : [10.00, '']
+        weight_nmda : [10.00, '']
+        weight_glyc : [10.00, '']

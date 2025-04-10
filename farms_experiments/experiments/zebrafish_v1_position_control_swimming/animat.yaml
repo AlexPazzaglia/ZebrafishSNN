@@ -1,0 +1,1051 @@
+sdf: farms_experiments/models/zebrafish_v1/sdf/zebrafish.sdf
+spawn:
+  loader: 0
+  mode: !!python/object/apply:farms_core.model.options.SpawnMode
+  - transverse
+  pose:
+  - 0.0
+  - 0.0
+  - -0.002
+  - 0.0
+  - 0.0
+  - 3.141592653589793
+  velocity:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+morphology:
+  links:
+  - name: link_0
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -1.7794e-03
+      - -1.2315e-03
+      - -8.5150e-04            #-0.0080213
+    - - -5.5217e-11
+      - -8.2108e-12
+      - -5.7211e-12
+    mass_multiplier: 1
+  - name: link_1
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -1.2284e-03
+      - -9.2458e-04
+      - -1.0008e-03            #-0.0058606
+    - - -1.6381e-11
+      - -5.4089e-12
+      - -9.2118e-12
+    mass_multiplier: 1
+  - name: link_2
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -1.4138e-03
+      - -1.0709e-03
+      - -1.1899e-03            #-0.0067746
+    - - -2.3030e-11
+      - -8.0146e-12
+      - -1.4282e-11
+    mass_multiplier: 1
+  - name: link_3
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -1.5708e-03
+      - -1.2959e-03
+      - -1.2959e-03            #-0.0080005
+    - - -3.1416e-11
+      - -1.1620e-11
+      - -1.9172e-11
+    mass_multiplier: 1
+  - name: link_4
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -1.5708e-03
+      - -1.2959e-03
+      - -1.2959e-03            #-0.0080005
+    - - -3.1416e-11
+      - -1.1620e-11
+      - -1.9172e-11
+    mass_multiplier: 1
+  - name: link_5
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -1.5708e-03
+      - -1.2959e-03
+      - -1.2959e-03            #-0.0080005
+    - - -3.1416e-11
+      - -1.1620e-11
+      - -1.9172e-11
+    mass_multiplier: 1
+  - name: link_6
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -2.0126e-03
+      - -1.8653e-03
+      - -1.5296e-03            #-0.0111901
+    - - -6.5745e-11
+      - -2.3778e-11
+      - -3.2769e-11
+    mass_multiplier: 1
+  - name: link_7
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -1.0390e-03
+      - -1.1892e-03
+      - -1.4562e-03            #-0.0068516
+    - - -1.0313e-11
+      - -1.2941e-11
+      - -3.7260e-11
+    mass_multiplier: 1
+  - name: link_8
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -9.2360e-04
+      - -1.1892e-03
+      - -1.2943e-03            #-0.0067353
+    - - -8.0122e-12
+      - -1.1503e-11
+      - -3.2475e-11
+    mass_multiplier: 1
+  - name: link_9
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -7.5040e-04
+      - -1.1892e-03
+      - -1.0517e-03            #-0.0065836
+    - - -5.3103e-12
+      - -9.3466e-12
+      - -2.6179e-11
+    mass_multiplier: 1
+  - name: link_10
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -5.7720e-04
+      - -1.1892e-03
+      - -8.0900e-04            #-0.0064608
+    - - -3.3573e-12
+      - -7.1897e-12
+      - -2.0847e-11
+    mass_multiplier: 1
+  - name: link_11
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -3.4560e-04
+      - -4.7517e-04
+      - -3.4558e-04            #-0.0026695
+    - - -8.7960e-13
+      - -6.9857e-13
+      - -1.3121e-12
+    mass_multiplier: 1
+  - name: link_12
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -1.9640e-04
+      - -3.1417e-04
+      - -1.5708e-04            #-0.0017378
+    - - -3.1063e-13
+      - -1.6824e-13
+      - -2.2912e-13
+    mass_multiplier: 1
+  - name: link_13
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -1.9640e-04
+      - -4.1233e-04
+      - -2.0617e-04            #-0.0022379
+    - - -3.1063e-13
+      - -3.4000e-13
+      - -7.0660e-13
+    mass_multiplier: 1
+  - name: link_14
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -1.3740e-04
+      - -6.2833e-04
+      - -2.1992e-04            #-0.0033371
+    - - -2.0381e-13
+      - -8.0191e-13
+      - -3.7422e-12
+    mass_multiplier: 1
+  - name: link_15
+    collisions: false #true
+    friction:
+    - 0.0 #0.7
+    - 0
+    - 0
+    extras:
+      restitution: 0.0
+      linearDamping: 0
+      angularDamping: 0
+    density: 950.0  # 982.0
+    swimming: true
+    drag_coefficients:
+    - - -2.4740e-04
+      - -1.4138e-03
+      - -2.7492e-04            #-0.0074926
+    - - -2.3600e-12
+      - -2.9164e-12
+      - -1.0546e-11
+    mass_multiplier: 1
+  self_collisions: []
+  joints:
+  - name: joint_0
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  - name: joint_1
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  - name: joint_2
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  - name: joint_3
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  - name: joint_4
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  - name: joint_5
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  - name: joint_6
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  - name: joint_7
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  - name: joint_8
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  - name: joint_9
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  - name: joint_10
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  - name: joint_11
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  - name: joint_12
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  - name: joint_13
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  - name: joint_14
+    initial:
+    - 0
+    - 0
+    limits:
+    - - -.inf
+      - .inf
+    - - -.inf
+      - .inf
+    stiffness: 0
+    springref: 0
+    damping: 0
+    extras: {}
+  n_joints_body: 15
+  n_dof_legs: 0
+  n_legs: 0
+control:
+  sensors:
+    links:
+    - link_0
+    - link_1
+    - link_2
+    - link_3
+    - link_4
+    - link_5
+    - link_6
+    - link_7
+    - link_8
+    - link_9
+    - link_10
+    - link_11
+    - link_12
+    - link_13
+    - link_14
+    - link_15
+    joints:
+    - joint_0
+    - joint_1
+    - joint_2
+    - joint_3
+    - joint_4
+    - joint_5
+    - joint_6
+    - joint_7
+    - joint_8
+    - joint_9
+    - joint_10
+    - joint_11
+    - joint_12
+    - joint_13
+    - joint_14
+    contacts:
+    - !!python/tuple
+      - link_0
+      - ''
+    - !!python/tuple
+      - link_1
+      - ''
+    - !!python/tuple
+      - link_2
+      - ''
+    - !!python/tuple
+      - link_3
+      - ''
+    - !!python/tuple
+      - link_4
+      - ''
+    - !!python/tuple
+      - link_5
+      - ''
+    - !!python/tuple
+      - link_6
+      - ''
+    - !!python/tuple
+      - link_7
+      - ''
+    - !!python/tuple
+      - link_8
+      - ''
+    - !!python/tuple
+      - link_9
+      - ''
+    - !!python/tuple
+      - link_10
+      - ''
+    - !!python/tuple
+      - link_11
+      - ''
+    - !!python/tuple
+      - link_12
+      - ''
+    - !!python/tuple
+      - link_13
+      - ''
+    - !!python/tuple
+      - link_14
+      - ''
+    - !!python/tuple
+      - link_15
+      - ''
+    xfrc:
+    - link_0
+    - link_1
+    - link_2
+    - link_3
+    - link_4
+    - link_5
+    - link_6
+    - link_7
+    - link_8
+    - link_9
+    - link_10
+    - link_11
+    - link_12
+    - link_13
+    - link_14
+    - link_15
+    muscles: []
+  motors:
+  - joint_name: joint_0
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  - joint_name: joint_1
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  - joint_name: joint_2
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  - joint_name: joint_3
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  - joint_name: joint_4
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  - joint_name: joint_5
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  - joint_name: joint_6
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  - joint_name: joint_7
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  - joint_name: joint_8
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  - joint_name: joint_9
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  - joint_name: joint_10
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  - joint_name: joint_11
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  - joint_name: joint_12
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  - joint_name: joint_13
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  - joint_name: joint_14
+    control_types:
+    - position
+    limits_torque:
+    - -.inf
+    - .inf
+    gains:
+    - 5.0e-3           #1.0e-4
+    - 1.0e-6           #5.0e-7
+    equation: position
+    transform:
+      gain: 1
+      bias: 0
+    offsets:
+      gain: 0
+      bias: 0
+      low: 1
+      high: 5
+      saturation: 0
+      rate: 2
+    passive:
+      is_passive: false
+      stiffness_coefficient: 0
+      damping_coefficient: 0
+      friction_coefficient: 0
+  kinematics_file: ''
+  kinematics_sampling: 0.001
+  kinematics_indices:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+
+  kinematics_time_index: 0
+  kinematics_invert: false
+  kinematics_degrees: false
+  kinematics_start: 0.0
+  kinematics_end: 0.0
+
+name: Animat
+show_xfrc: false
+scale_xfrc: 10
+mujoco:
+  solref:
+  - -80000.0
+  - -800.0

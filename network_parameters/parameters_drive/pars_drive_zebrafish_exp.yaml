@@ -1,0 +1,17 @@
+limb_connectivity_schemes_with_drive_offset : []
+
+lfac_max : 0
+dfac_max : 0
+
+drives:
+
+ - gait: swim
+   modes:
+    - feedback: Any
+      lfac      : False
+      dfac      : False
+
+      drives_axis:
+      - 4.0
+
+      drives_limbs: []

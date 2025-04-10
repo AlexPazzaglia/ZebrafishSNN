@@ -1,0 +1,81 @@
+############################################################################
+# Integrate-and-Fire model
+# From Dayan and Abbott (2001), section 5.4.
+# Parameters are from Fig 5.5.
+#
+# Written in xppaut by Yoonsuck Choe http://faculty.cs.tamu.edu/choe
+# Tue Feb 20 09:36:35 CST 2007
+############################################################################
+
+#########################################
+# 1. parameters
+#########################################
+
+# capacitance: uF
+param C=1.0
+
+# resistance : Mohm
+param R=10.0
+
+# spike threshold: mV
+param Vthresh=-50
+
+# resting membrane potential: mV
+param Erest=-65
+
+########################################
+# 2. Input: try commenting out different options below.
+########################################
+#
+# 1. constant current: nA
+#  I=2.0
+
+# 2. A sinusoidal input (function of t): nA
+# I=sin(t/5.0)+2.0
+
+# 3. A step input (heav is the Heaviside step function): nA
+  I=heav(-t+50)*2.0
+
+# time constant = R*C: ms
+# - to use an expression, you need to define this as a variable rather
+#   than a parameter (no "param")
+tau=R*C
+
+#########################################
+# 3. Model ODE
+#########################################
+init V=-80
+
+dV/dt=((Erest-V)+R*I)/tau
+
+# reset condition: when (V-theta)=0, the part in {...} gets evaluated.
+global 1 {V-Vthresh} {V=Erest}
+
+#########################################
+# 4. Simulation configuration
+#########################################
+
+# simulation duration
+@ total=150
+
+########################################
+# 5. Plotting
+########################################
+
+# auxiliary variables for plotting
+#
+# This plots V_infinity, the steady state voltage given a constant input I
+aux Vinf=Erest+R*I
+
+# number of plots
+@ nplot=2
+
+# designate variables to plot (define yp2, yp3, etc. for 2nd, 3rd plots, etc.)
+@ yp1=V
+@ yp2=Vinf
+
+# plotting range
+@ xlo=0,xhi=150
+@ ylo=-75.0,yhi=-10
+
+done

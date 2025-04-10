@@ -1,0 +1,120 @@
+# The topology lists all the modules
+# The modules list all their populations
+# The populations list all their sub-populations
+
+# If not specified:
+#   position_limits = pool_length * [pool_ind, pool_ind+1]
+#   axial:
+#     pools  = axial_segments,
+#     copies = 1
+#     sides  = ['l', 'r']
+#     pool_rows   = 1
+#   limbs:
+#     pools  = limb_segments,
+#     copies = limbs
+#     sides_list  = ['f', 'e']
+#     rows   = 1
+
+
+length_axial     : 0.1
+segments_axial   : 0
+segments_per_limb: 1
+limbs            : 4
+limbs_positions  :
+  - 0.000
+  - 0.000
+  - 0.375
+  - 0.375
+
+# Inter-limb connectivity
+pars_limb_connectivity_filename: pars_limb_connectivity_test
+limb_connectivity_scheme       : inhibitory
+
+# Axis and Limb connectivity
+connectivity_axial_filename     : connectivity_axis_test
+connectivity_limbs_filename     : connectivity_limb_test
+
+# Trunk-tail connectivity
+trunk_tail_discontinuity_flag : 1
+
+# Ascending feedback
+ascending_feedback :
+- noFB
+- FB
+
+ascending_feedback_flag   : 0
+
+# Network organization
+topology:
+  # CPG
+  - name: cpg
+    neuron_group: 0
+    pool_rows: 10
+
+    axial:
+      include: false
+      plotting:
+        color: black
+        linestyle: '-'
+    limbs:
+      plotting:
+        color: navy
+        linestyle: '--'
+
+    sub_parts_description:
+      - name: ex
+        n_pool: 60
+
+      - name: in
+        n_pool: 60
+
+  # RS
+  - name: rs
+    neuron_group: 0
+
+    axial:
+      include: false
+      pools : 6
+      pools_names:
+        - rost
+        - midt
+        - endt
+        - pelv
+        - tail
+        - caud
+      pools_positions_limits:
+        # rost
+        - - 0.0000      # 0/400
+          - 0.2475      # 99/400
+        # midt
+        - - 0.0050      # 2/400
+          - 0.3300      # 132/400
+        # endt
+        - - 0.1775      # 71/400
+          - 0.5175      # 207/400
+        # pelv
+        - - 0.2125      # 85/400
+          - 0.5475      # 219/400
+        # tail
+        - - 0.3725      # 149/400
+          - 0.9975      # 399/400
+        # caud
+        - - 0.7500      # 300/400
+          - 0.9975      # 399/400
+      plotting:
+        color: dimgrey
+        linestyle: '-'
+    limbs:
+      pools : 1
+      pools_names:
+        - 'LF'
+        - 'RF'
+        - 'LH'
+        - 'RH'
+      plotting:
+        color: royalblue
+        linestyle: '-'
+
+    sub_parts_description:
+      - name: rs
+        n_pool: 120

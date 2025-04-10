@@ -1,0 +1,148 @@
+# Raster plots
+monitor_spikes :
+  active   : True
+  save     : True
+  to_csv   : False
+  indices  : True
+  plotpars :
+    showit        : True
+    animate       : True
+    gridon        : True
+    densegrid     : False
+    side_ids      : [0]
+    excluded_mods : [cpg.axial.in, cpg.limbs.in]
+    order_mods    : [rs, cpg, mn, ps]
+    insert_limbs  : False
+    zoom_plot     : True
+    mirror_plot   : False
+    sampling_ratio: 0.1
+    isi_plot :
+      showit : False
+      modules: [ex, in]
+
+# Smooth pool activations
+monitor_pools_activation :
+
+  target_modules:
+    - mod_name     : cpg
+      ner_name     : ex
+      smooth_factor: 0.999
+
+    - mod_name     : cpg
+      ner_name     : in
+      smooth_factor: 0.999
+
+    - mod_name     : mn
+      ner_name     : mn
+      smooth_factor: 0.999
+
+  plotpars :
+    showit        : True
+    densegrid     : False
+    gridon        : False
+    animate       : True
+    sampling_ratio: 0.25
+
+    # Cycle frequency
+    cycle_freq :
+      showit  : False
+      ner_name: ex
+      save    : False
+      close   : True
+
+# Hilbert transform
+monitor_hilbert :
+  active   : True
+  mod_name : cpg
+  ner_name : ex
+
+  # Instantaneous frequency
+  freq_evolution :
+    active   : True
+    plotpars :
+      showit : True
+
+  # Instantaneous phase
+  ipl_evolution :
+    active   : True
+    plotpars :
+      showit         : True
+      trunk_only     : True
+      jump_at_girdles: False
+
+# Neuronal variables
+monitor_states :
+  active   : False
+  save     : True
+  to_csv   : False
+  indices  : True
+  rate     : 1                    # Multiple of simulation timestep
+  variables: [v, w1, w2, I_ext, I_tot,]
+  plotpars :
+    showit  : True
+    figure  : True
+    animate : False
+
+    # Voltage traces
+    voltage_traces :
+      showit  : False
+      modules : [cpg.axial.ex, mn.axial.mn]
+      save    : True
+      close   : True
+
+# Muscle cells
+monitor_musclecells :
+  active   : True
+  save     : True
+  to_csv   : False
+  indices  : True
+  variables: [v, I_tot,]          # g_ampa_mc_tot g_nmda_mc_tot
+  rate     : 1                    # Multiple of simulation timestep
+  plotpars :
+    showit        : True
+    filtering     : False
+    sampling_ratio: 0.25
+    duty_cycle_ax :
+      showit     : False
+      target_seg : []
+
+# Network connectivity
+monitor_connectivity :
+  active   : True
+  plotpars :
+    showit   : True
+    gridon   : False
+    densegrid: False
+    muscles  : True
+
+# FARMS data
+monitor_farmsim :
+  active   : True
+  plotpars :
+    joint_angles    : True
+    joint_velocities: True
+    com_trajectory  :
+      showit : True
+      pos_1D : True
+      pos_2D : True
+      vel_1D : True
+    trajectory_fit  : True
+    animation       :
+      active      : False
+      showit      : False
+      video_speed : 1.0
+      save_frames : False
+
+# Online metrics
+# TODO: Add saving of online metrics
+monitor_online_metrics :
+  active   : True
+  save     : False
+  plotpars :
+    activity : True
+    period   : True
+    duty     : True
+
+
+
+

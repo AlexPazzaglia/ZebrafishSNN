@@ -1,0 +1,214 @@
+## AXIAL TO AXIAL
+ax2ax:
+
+  # E2E Ipsi
+  - name      : AX_ex -> AX_ex Ipsi
+    synapse   : syn_ex
+    type      : gaussian_identity
+    parameters:
+      y_type  : y_neur
+      amp     : 0.50
+      sigma_up: 0.8
+      sigma_dw: 1.2
+
+    cond_list : [
+      ['', same, ax, ex, ax, ex]
+    ]
+    cond_str  : ''
+
+  # E2I Ipsi
+  - name      : AX_ex -> AX_in Ipsi
+    synapse   : syn_ex
+    type      : gaussian_identity
+    parameters:
+      y_type  : y_neur
+      amp     : 0.50
+      sigma_up: 0.8
+      sigma_dw: 1.0
+
+    cond_list : [
+      ['', same, ax, ex, ax, in]
+    ]
+    cond_str  : ''
+
+  # I2All contra
+  - name      : AX_in -> AX_all Contra
+    synapse   : syn_in
+    type      : gaussian_identity
+    parameters:
+      y_type  : y_neur
+      amp     : 0.50
+      sigma_up: 0.8
+      sigma_dw: 1.2
+
+    cond_list : [
+      ['', opposite, ax, in, ax, [ex, in]]
+    ]
+    cond_str  : ''
+
+
+## RETICULOSPINAL TO AXIAL
+rs2ax:
+  - name      : AX_rs -> AX_all Rostral
+    synapse   : syn_ex
+    type      : sat_gaussian_identity
+    parameters:
+      y_type  : y_neur
+      amp     : 0.80
+      sigma_up: 1.35
+      sigma_dw: 1.35
+      limits  : [null, null, 0, 1]
+
+    cond_list : [
+      ['', same, ax, rs, ax, [ex, in]]
+    ]
+    cond_str  : ''
+
+  - name      : AX_rs -> AX_all MidTrunk
+    synapse   : syn_ex
+    type      : sat_gaussian_identity
+    parameters:
+      y_type  : y_neur
+      amp     : 0.80
+      sigma_up: 1.35
+      sigma_dw: 1.35
+      limits  : [0, 0.42307692307, 0.57692307692, 1] # 11/26
+
+    cond_list : [
+      ['', same, ax, rs, ax, [ex, in]]
+    ]
+    cond_str  : ''
+
+  - name      : AX_rs -> AX_all TrunkEnd
+    synapse   : syn_ex
+    type      : sat_gaussian_identity
+    parameters:
+      y_type  : y_neur
+      amp     : 0.80
+      sigma_up: 1.50
+      sigma_dw: 0.28
+      limits  : [0, 0.5, 0.5, 1]
+
+    cond_list : [
+      ['', same, ax, rs, ax, [ex, in]]
+    ]
+    cond_str  : ''
+
+  - name      : AX_rs -> AX_all Pelvis
+    synapse   : syn_ex
+    type      : sat_gaussian_identity
+    parameters:
+      y_type  : y_neur
+      amp     : 0.80
+      sigma_up: 0.28
+      sigma_dw: 1.34
+      limits  : [0, 0.5, 0.5, 1]
+
+    cond_list : [
+      ['', same, ax, rs, ax, [ex, in]]
+    ]
+    cond_str  : ''
+
+  - name      : AX_rs -> AX_all Tail
+    synapse   : syn_ex
+    type      : sat_gaussian_identity
+    parameters:
+      y_type  : y_neur
+      amp     : 0.80
+      sigma_up: 1.34
+      sigma_dw: 1.35
+      limits  : [0, 0.256, 0.760, 1]
+
+    cond_list : [
+      ['', same, ax, rs, ax, [ex, in]]
+    ]
+    cond_str  : ''
+
+  - name      : AX_rs -> AX_all CaudalEnd
+    synapse   : syn_ex
+    type      : sat_gaussian_identity
+    parameters:
+      y_type  : y_neur
+      amp     : 0.80
+      sigma_up: 1.35
+      sigma_dw: 1.35
+      limits  : [0, 1, null, null]
+
+    cond_list : [
+      ['', same, ax, rs, ax, [ex, in]]
+    ]
+    cond_str  : ''
+
+## AXIAL TO RETICULOSPINAL
+ax2rs:
+  - pool_to_pool : true
+
+  - name      : AX_ex -> AX_rs Ipsi
+    synapse   : syn_ex
+    type      : connect_identity
+    parameters:
+      amp     : 0.003
+
+    cond_list : [
+      ['', same, ax, ex, ax, rs]
+    ]
+    cond_str  : ''
+
+  - name      : AX_in -> AX_rs Contra
+    synapse   : syn_in
+    type      : connect_identity
+    parameters:
+      amp     : 0.003
+
+    cond_list : [
+      ['', opposite, ax, in, ax, rs]
+    ]
+    cond_str  : ''
+
+## AXIAL TO MOTOR NEURONS
+ax2mn:
+  - name      : AX_ex -> AX_mn Ipsi
+    synapse   : syn_ex
+    type      : gaussian_identity
+    parameters:
+      y_type  : y_neur
+      amp     : 0.50
+      sigma_up: 1.0
+      sigma_dw: 1.0
+
+    cond_list : [
+      ['', same, ax, ex, ax, mn]
+    ]
+    cond_str  : ''
+
+## PROPRIOSENSORY TO AXIAL
+ps2ax:
+  - name      : AX_ps -> AX_ex Contra
+    synapse   : syn_in
+    type      : gaussian_identity
+    parameters:
+      y_type  : y_mech
+      amp     : 0.50
+      sigma_up: 2.0
+      sigma_dw: 0.0
+
+    cond_list : [
+      [ '', contra, ax, ps, ax, ex]
+    ]
+    cond_str  : ''
+
+## MOTOR NEURONS TO MUSCLE CELLS
+mn2mc:
+  - name      : AX_mn -> AX_mc Ipsi
+    synapse   : syn_mc_ex
+    type      : gaussian_identity
+    parameters:
+      y_type  : y_mech
+      amp     : 0.80
+      sigma_up: 1.0
+      sigma_dw: 1.0
+
+    cond_list : [
+      ['', same, ax, mn, ax, mc]
+    ]
+    cond_str  : ''

@@ -1,0 +1,424 @@
+# The topology lists all the modules
+# The modules list all their populations
+# The populations list all their sub-populations
+
+# If not specified:
+#   position_limits = pool_length * [pool_ind, pool_ind+1]
+#   axial:
+#     pools  = axial_segments,
+#     copies = 1
+#     sides  = ['l', 'r']
+#     pool_rows   = 1
+#   limbs:
+#     pools  = limb_segments,
+#     copies = limbs
+#     sides_list  = ['f', 'e']
+#     rows   = 1
+
+
+length_axial     : 0.018
+segments_axial   : 32
+segments_per_limb: 0
+limbs            : 0
+limbs_positions  : []
+
+# Inter-limb connectivity
+pars_limb_connectivity_filename: ''
+limb_connectivity_scheme       : ''
+
+# Axis and Limb connectivity
+connectivity_axial_filename     : connectivity_axis_zebrafish_exp
+connectivity_limbs_filename     : ''
+
+# Trunk-tail connectivity
+trunk_tail_discontinuity_flag : 0
+
+# Ascending feedback
+ascending_feedback :
+- noFB
+- FB
+
+ascending_feedback_flag   : 0
+
+
+####################
+# length = 0.018
+# xvals  = np.linspace(0.0025,0.0155, 33) / length
+
+# print_str = ''
+# for seg_ind in range(32):
+#     x_start = xvals[seg_ind]
+#     x_end   = xvals[seg_ind + 1]
+
+#     print_str += (f'\n        - - {x_start:.4f}')
+#     print_str += (f'\n          - {x_end:.4f}')
+
+# print(print_str)
+####################
+
+# Network organization
+topology:
+  # CPG
+  - name: cpg
+    neuron_group: 0
+    pool_rows: 8
+
+    axial:
+      pools_positions_limits:
+        - - 0.1389
+          - 0.1615
+        - - 0.1615
+          - 0.1840
+        - - 0.1840
+          - 0.2066
+        - - 0.2066
+          - 0.2292
+        - - 0.2292
+          - 0.2517
+        - - 0.2517
+          - 0.2743
+        - - 0.2743
+          - 0.2969
+        - - 0.2969
+          - 0.3194
+        - - 0.3194
+          - 0.3420
+        - - 0.3420
+          - 0.3646
+        - - 0.3646
+          - 0.3872
+        - - 0.3872
+          - 0.4097
+        - - 0.4097
+          - 0.4323
+        - - 0.4323
+          - 0.4549
+        - - 0.4549
+          - 0.4774
+        - - 0.4774
+          - 0.5000
+        - - 0.5000
+          - 0.5226
+        - - 0.5226
+          - 0.5451
+        - - 0.5451
+          - 0.5677
+        - - 0.5677
+          - 0.5903
+        - - 0.5903
+          - 0.6128
+        - - 0.6128
+          - 0.6354
+        - - 0.6354
+          - 0.6580
+        - - 0.6580
+          - 0.6806
+        - - 0.6806
+          - 0.7031
+        - - 0.7031
+          - 0.7257
+        - - 0.7257
+          - 0.7483
+        - - 0.7483
+          - 0.7708
+        - - 0.7708
+          - 0.7934
+        - - 0.7934
+          - 0.8160
+        - - 0.8160
+          - 0.8385
+        - - 0.8385
+          - 0.8611
+
+    limbs:
+      include: false
+
+    sub_parts_description:
+      - name: ex
+
+        sub_parts_description:
+          - name: V2a
+            n_pool: 32
+
+            plotting:
+              color: "#59B2D5"  #[89, 178, 213]
+              linestyle: '-'
+
+
+      - name: in
+
+        sub_parts_description:
+          - name: V0d
+            n_pool: 48
+
+            plotting:
+              color: "#9D9D9D"  #[157, 157, 157]
+              linestyle: '-'
+
+  # RS
+  - name: rs
+    neuron_group: 0
+
+    axial:
+      pools : 1
+      pools_names:
+        - rs
+      pools_positions_limits:
+        - - 0.00
+          - 0.01
+      plotting:
+        color: dimgrey
+        linestyle: '-'
+    limbs:
+      include: false
+
+    sub_parts_description:
+      - name: rs
+        n_pool: 100
+
+  # MN
+  - name: mn
+    neuron_group: 0
+
+    axial:
+      plotting:
+        color: "#BD6365"  # [189 99 101]
+        linestyle: '-'
+
+      pools_positions_limits:
+        - - 0.1389
+          - 0.1615
+        - - 0.1615
+          - 0.1840
+        - - 0.1840
+          - 0.2066
+        - - 0.2066
+          - 0.2292
+        - - 0.2292
+          - 0.2517
+        - - 0.2517
+          - 0.2743
+        - - 0.2743
+          - 0.2969
+        - - 0.2969
+          - 0.3194
+        - - 0.3194
+          - 0.3420
+        - - 0.3420
+          - 0.3646
+        - - 0.3646
+          - 0.3872
+        - - 0.3872
+          - 0.4097
+        - - 0.4097
+          - 0.4323
+        - - 0.4323
+          - 0.4549
+        - - 0.4549
+          - 0.4774
+        - - 0.4774
+          - 0.5000
+        - - 0.5000
+          - 0.5226
+        - - 0.5226
+          - 0.5451
+        - - 0.5451
+          - 0.5677
+        - - 0.5677
+          - 0.5903
+        - - 0.5903
+          - 0.6128
+        - - 0.6128
+          - 0.6354
+        - - 0.6354
+          - 0.6580
+        - - 0.6580
+          - 0.6806
+        - - 0.6806
+          - 0.7031
+        - - 0.7031
+          - 0.7257
+        - - 0.7257
+          - 0.7483
+        - - 0.7483
+          - 0.7708
+        - - 0.7708
+          - 0.7934
+        - - 0.7934
+          - 0.8160
+        - - 0.8160
+          - 0.8385
+        - - 0.8385
+          - 0.8611
+
+    limbs:
+      include: false
+
+    sub_parts_description:
+      - name: mn
+        n_pool: 60
+
+  # PS
+  - name: ps
+    neuron_group: 0
+
+    axial:
+      plotting:
+        color: "#5AC694" # [90 198 148]
+        linestyle: '-'
+
+      pools_positions_limits:
+        - - 0.1389
+          - 0.1615
+        - - 0.1615
+          - 0.1840
+        - - 0.1840
+          - 0.2066
+        - - 0.2066
+          - 0.2292
+        - - 0.2292
+          - 0.2517
+        - - 0.2517
+          - 0.2743
+        - - 0.2743
+          - 0.2969
+        - - 0.2969
+          - 0.3194
+        - - 0.3194
+          - 0.3420
+        - - 0.3420
+          - 0.3646
+        - - 0.3646
+          - 0.3872
+        - - 0.3872
+          - 0.4097
+        - - 0.4097
+          - 0.4323
+        - - 0.4323
+          - 0.4549
+        - - 0.4549
+          - 0.4774
+        - - 0.4774
+          - 0.5000
+        - - 0.5000
+          - 0.5226
+        - - 0.5226
+          - 0.5451
+        - - 0.5451
+          - 0.5677
+        - - 0.5677
+          - 0.5903
+        - - 0.5903
+          - 0.6128
+        - - 0.6128
+          - 0.6354
+        - - 0.6354
+          - 0.6580
+        - - 0.6580
+          - 0.6806
+        - - 0.6806
+          - 0.7031
+        - - 0.7031
+          - 0.7257
+        - - 0.7257
+          - 0.7483
+        - - 0.7483
+          - 0.7708
+        - - 0.7708
+          - 0.7934
+        - - 0.7934
+          - 0.8160
+        - - 0.8160
+          - 0.8385
+        - - 0.8385
+          - 0.8611
+
+    limbs:
+      include: false
+
+    sub_parts_description:
+      - name: ps
+        n_pool: 4
+
+  # MC
+  - name: mc
+    neuron_group: 1
+
+    axial:
+
+      pools_positions_limits:
+        - - 0.1389
+          - 0.1649
+        - - 0.1649
+          - 0.1910
+        - - 0.1910
+          - 0.2170
+        - - 0.2170
+          - 0.2431
+        - - 0.2431
+          - 0.2691
+        - - 0.2691
+          - 0.2951
+        - - 0.2951
+          - 0.3212
+        - - 0.3212
+          - 0.3472
+        - - 0.3472
+          - 0.3733
+        - - 0.3733
+          - 0.3993
+        - - 0.3993
+          - 0.4253
+        - - 0.4253
+          - 0.4514
+        - - 0.4514
+          - 0.4774
+        - - 0.4774
+          - 0.5035
+        - - 0.5035
+          - 0.5295
+        - - 0.5295
+          - 0.5556
+        - - 0.5556
+          - 0.5816
+        - - 0.5816
+          - 0.6076
+        - - 0.6076
+          - 0.6337
+        - - 0.6337
+          - 0.6597
+        - - 0.6597
+          - 0.6858
+        - - 0.6858
+          - 0.7118
+        - - 0.7118
+          - 0.7378
+        - - 0.7378
+          - 0.7639
+        - - 0.7639
+          - 0.7899
+        - - 0.7899
+          - 0.8160
+        - - 0.8160
+          - 0.8420
+        - - 0.8420
+          - 0.8681
+        - - 0.8681
+          - 0.8941
+        - - 0.8941
+          - 0.9201
+        - - 0.9201
+          - 0.9462
+        - - 0.9462
+          - 0.9722
+
+    limbs:
+      include: false
+
+    sub_parts_description:
+      - name: mc
+        n_pool: 2
+
+
+
+
