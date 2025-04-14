@@ -7,7 +7,7 @@ from matplotlib.animation import FuncAnimation
 
 from farms_mujoco.swimming.drag import WaterProperties
 
-from lilytorch.util.yaml_operations import yaml2pyobject
+from network_modules.vortices.yaml_operations import yaml2pyobject
 
 ###############################################################################
 # WATER DYNAMICS ##############################################################

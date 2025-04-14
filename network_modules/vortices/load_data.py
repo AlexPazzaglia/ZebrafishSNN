@@ -547,7 +547,7 @@ def get_experimental_signal(
 
 def main():
 
-    folder_name = 'lilytorch/scripts/zebrafish_files/data'
+    folder_name = 'network_modules/vortices/data'
     file_name   = 'kinematics_recording.csv'
 
     save_data = False

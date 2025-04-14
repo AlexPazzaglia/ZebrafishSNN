@@ -392,8 +392,7 @@ def _get_fish_half_thickness_spline_from_sketch(
     '''
 
     svg_file = (
-        '/data/pazzagli/ProjectSNN/fluid_solvers/zebrafish/'
-        'lilytorch/scripts/zebrafish_files/data/zebrafish_sketch.svg'
+        'network_modules/vortices/data/zebrafish_sketch.svg'
     )
     path_id0 = 'path13'
     path_id1 = 'path5298'

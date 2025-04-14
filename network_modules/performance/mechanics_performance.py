@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import linregress
 from scipy.signal import find_peaks, hilbert, butter, filtfilt
 from network_modules.simulation.mechanical_simulation import MechSimulation
+from network_modules.vortices.body_loader import load_body_from_parameters
 
 import network_modules.performance.signal_processor_mech as MechProc
 
@@ -842,8 +843,6 @@ class MechPerformance(MechSimulation):
         times: np.ndarray,
     ):
         ''' Get the reference signal '''
-
-        from lilytorch.body_loader import load_body_from_parameters
 
         n_steps   = len(times)
         time_step = times[1] - times[0]

@@ -8,8 +8,8 @@ from scipy.interpolate import interp2d
 
 import network_modules.vortices.plot_fish as zebraplot
 
-from lilytorch.scripts.zebrafish_files.load_data import get_experimental_signal
-from lilytorch.scripts.zebrafish_files.extract_sinusoidal_signal import (
+from network_modules.vortices.load_data import get_experimental_signal
+from network_modules.vortices.extract_sinusoidal_signal import (
     get_sinusoidal_signal,
     get_real_time_phase_fun,
     get_real_time_amp_fun,

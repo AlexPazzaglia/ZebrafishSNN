@@ -17,7 +17,8 @@ from matplotlib.figure import Figure
 from matplotlib.image import AxesImage
 
 from network_modules.plotting.plots_utils import ANIMATIONS_FRAME_RATE
-from lilytorch.scripts.zebrafish_files.plot_fish import plot_fish_configuration
+from network_modules.vortices.plot_fish import plot_fish_configuration
+from network_modules.vortices.body_loader import load_body_from_parameters
 
 class MidpointNormalize(mcolors.Normalize):
     ''' Normalize colormap with midpoint at zero '''
@@ -671,8 +672,6 @@ def _save_links_trajectory_animation_frames(
     currtime  = time.strftime("%Y%m%d-%H%M%S")
 
     # Define leader signal
-    from lilytorch.body_loader import load_body_from_parameters
-
     water_dynamics  = water_parameters['water_dynamics']
     water_path      = water_dynamics['results_path']
     water_pars_path = f'{water_path}/parameters.yaml'
