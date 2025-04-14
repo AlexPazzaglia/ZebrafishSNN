@@ -4,7 +4,10 @@ import numpy as np
 
 from typing import Union
 from farms_mujoco.simulation.task import TaskCallback
-from farms_amphibious.model.options import AmphibiousOptions, AmphibiousArenaOptions
+from farms_amphibious.model.options import (
+    SpikingOptions,
+    AmphibiousArenaOptions,
+)
 
 class SpringDamper():
 
@@ -64,7 +67,7 @@ class SpringDamperCallback(TaskCallback):
 
     def __init__(
             self,
-            animat_options: AmphibiousOptions,
+            animat_options: SpikingOptions,
             arena_options: AmphibiousArenaOptions,
             spring_damper_properties: dict,
     ):
