@@ -1,0 +1,11 @@
+farms_core
+farms_mujoco
+cython
+numpy
+scipy
+matplotlib
+tqdm
+pyyaml
+trimesh
+imageio
+simple_pid

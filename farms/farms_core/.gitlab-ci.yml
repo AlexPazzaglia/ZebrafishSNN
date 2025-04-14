@@ -1,0 +1,48 @@
+image: python:latest
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+    - venv/
+
+before_script:
+  - python --version
+  - pip install virtualenv
+  - virtualenv venv
+  - source venv/bin/activate
+
+pages:
+  script:
+    # Check Python and pip
+    - which python
+    - python --version
+    - which pip
+    - pip --version
+
+    # Install requirements
+    - pip install sphinx sphinx-rtd-theme sphinx-autodoc-typehints numpydoc
+    - pip install -r requirements.txt
+
+    # Install package
+    - pip install . -vvv
+
+    # Check Sphinx
+    - which sphinx-build
+    - sphinx-build --version
+
+    # # Build with sphinx
+    # - sphinx-build -b html ducks/ public/
+
+    # Build with make
+    - cd ducks ; make html
+    - mv _build/html/ ../public/
+
+  artifacts:
+    paths:
+    - public
+
+  rules:
+   - when: manual
