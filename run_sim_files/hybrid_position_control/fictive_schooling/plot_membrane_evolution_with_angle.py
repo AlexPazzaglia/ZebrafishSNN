@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from run_sim_files.zebrafish.hybrid_position_control.fictive_schooling.interpolate_experimental_angles import get_scaled_signal
-# from run_sim_files.zebrafish.hybrid_position_control.fictive_schooling.plot_membrane_evolution_with_angle  import plot_membrane_and_angle_evolution
+from run_sim_files.hybrid_position_control.fictive_schooling.interpolate_experimental_angles import get_scaled_signal
+# from run_sim_files.hybrid_position_control.fictive_schooling.plot_membrane_evolution_with_angle  import plot_membrane_and_angle_evolution
 
 def _plot_module(
     statemon_t,

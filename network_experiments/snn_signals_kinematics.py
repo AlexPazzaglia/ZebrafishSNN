@@ -162,6 +162,11 @@ def kinematics_output_signal_save(
         axis = 1
     )
 
+    # Create folder if it does not exist
+    folder = os.path.dirname(save_file)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
     # Save
     np.savetxt(
         save_file,
