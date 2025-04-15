@@ -808,7 +808,7 @@ class WaterDynamicsCallback(WaterProperties):
 def main():
 
     results_path = (
-        "/data/pazzagli/simulation_results/fluid_solver/"
+        "simulation_results/fluid_solver/"
         "saved_simulations/"
         # "10s_amp_100_300Hz_abdquickest_fast_speed_sketch_body_2025-03-12T15:18:42.576709"
         "30s_continuous_amp_100_constant_034Hz_abdquickest_exp_12104_12264_scaled_025_bounded_NaN_NaN_Hz_fast_speed_sketch_body_2025-03-11T15:12:31.648789"

@@ -22,7 +22,7 @@ N_JOINTS_AXIS = default.N_JOINTS_AXIS
 def main():
     ''' Run the spinal cord model together with the mechanical simulator '''
 
-    results_path             = '/data/pazzagli/simulation_results_test'
+    results_path             = 'simulation_results_test'
     simulation_data_file_tag = 'vary_drag_coefficients'
 
     # Default parameters

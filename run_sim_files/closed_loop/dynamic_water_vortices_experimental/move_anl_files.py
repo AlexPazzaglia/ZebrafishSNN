@@ -27,7 +27,7 @@ def move_target_folders(
 ):
     ''' Collect data from the simulation results and delete the folders '''
 
-    src_folder_root  = '/data/pazzagli/simulation_results/data'
+    src_folder_root  = 'simulation_results/data'
     dst_folder_root  = '/data/hd/simulation_results/zebrafish_simulations/schooling'
 
     if folder_name_root is None:

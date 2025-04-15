@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-RESULTS_PATH    = '/data/pazzagli/simulation_results'
+RESULTS_PATH    = 'simulation_results'
 MODULE_NAME     = 'net_farms_zebrafish'
 SIMULATION_TAG = 'dynamic_water_vortices_fixed_head'
 

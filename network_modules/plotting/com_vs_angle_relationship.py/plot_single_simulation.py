@@ -107,7 +107,7 @@ def plot_experimental_density_map_2(
 def plot_results():
 
     target_folder = (
-        '/data/pazzagli/simulation_results_test/data/'
+        'simulation_results_test/data/'
         'net_farms_zebrafish_dynamic_water_vortices_closed_loop_fixed_head_100_SIM/'
         'process_0/run_0/farms/com_vs_angle_data_030Hz_open_loop'
     )

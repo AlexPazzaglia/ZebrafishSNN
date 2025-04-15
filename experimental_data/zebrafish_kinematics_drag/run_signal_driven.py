@@ -274,7 +274,7 @@ def optimize_drive_amp(
 def main():
     ''' Run the spinal cord model together with the mechanical simulator '''
 
-    results_path = '/data/pazzagli/simulation_results'
+    results_path = 'simulation_results'
 
     ########################################################
     # DRAG COEFFICIENTS ####################################

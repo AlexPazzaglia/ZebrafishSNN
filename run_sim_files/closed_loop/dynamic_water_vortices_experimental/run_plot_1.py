@@ -19,7 +19,7 @@ import network_experiments.default_parameters.zebrafish.closed_loop.default as d
 def main():
     ''' Run the spinal cord model together with the mechanical simulator '''
 
-    results_path = '/data/pazzagli/simulation_results'
+    results_path = 'simulation_results'
     module_name  = 'net_farms_zebrafish'
     folder_tag   = 'dynamic_water_vortices_closed_loop_fixed_head_040'
     folder_name  = f'{module_name}_{folder_tag}_100_SIM'

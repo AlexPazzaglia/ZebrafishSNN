@@ -17,7 +17,7 @@ from network_experiments.snn_utils import start_deletion_schedule
 from farms_core.model.options import SpawnMode
 from sim_runner import run_simulation
 
-RESULTS_PATH   = '/data/pazzagli/simulation_results'
+RESULTS_PATH   = 'simulation_results'
 MODULE_NAME    = 'net_farms_zebrafish'
 SIMULATION_TAG = 'dynamic_water_vortices_fixed_head'
 

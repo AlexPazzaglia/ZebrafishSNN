@@ -12,7 +12,7 @@ import argparse
 from network_experiments import snn_optimization_problem
 
 # # NOTE: For testing
-# args['results_path']    = '/data/pazzagli/simulation_results_test'
+# args['results_path']    = 'simulation_results_test'
 # args['n_processes']     = 1
 # args['n_sub_processes'] = 2
 # args['n_gen']           = 2
@@ -49,7 +49,7 @@ def parse_arguments(new_args : list[dict] = None):
         action  = 'store',
         type    = str,
         help    = "Results location",
-        default = '/data/pazzagli/simulation_results'
+        default = 'simulation_results'
     )
     parser.add_argument(
         "--n_processes",

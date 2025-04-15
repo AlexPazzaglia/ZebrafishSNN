@@ -73,7 +73,7 @@ def start_deletion_schedule(
 # Example usage
 if __name__ == "__main__":
 
-    results_folder = '/data/pazzagli/simulation_results/data'
+    results_folder = 'simulation_results/data'
 
     # target_folders = [
     #     f'{results_folder}/net_farms_zebrafish_dynamic_water_vortices_fixed_head_experimental_{seed}_SIM'

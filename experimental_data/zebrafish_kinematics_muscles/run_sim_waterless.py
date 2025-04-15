@@ -29,7 +29,7 @@ def main():
     ''' Run the spinal cord model together with the mechanical simulator '''
 
     # SIMULATION
-    results_path = '/data/pazzagli/simulation_results'
+    results_path = 'simulation_results'
 
     duration  = 20.0
     timestep  = 0.001

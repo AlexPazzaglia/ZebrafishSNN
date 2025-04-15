@@ -40,7 +40,7 @@ def parse_arguments(new_args : list[dict] = None):
         action  = 'store',
         type    = str,
         help    = "Results location",
-        default = '/data/pazzagli/simulation_results',
+        default = 'simulation_results',
     )
     parser.add_argument(
         "--n_processes_batch",

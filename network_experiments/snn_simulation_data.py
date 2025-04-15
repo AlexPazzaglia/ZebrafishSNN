@@ -133,7 +133,7 @@ def delete_folder(
     Args:
         source_folder (str): Path to the folder to be deleted.
     '''
-    if 'data/pazzagli/simulation_results/data' in source_folder:
+    if 'simulation_results/data' in source_folder:
         raise ValueError('Cannot programmatically delete files from data folder, do it manually')
     shutil.rmtree(source_folder)
     return

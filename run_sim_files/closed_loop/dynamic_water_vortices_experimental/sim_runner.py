@@ -24,10 +24,10 @@ import network_experiments.default_parameters.zebrafish.closed_loop.default as d
 ###############################################################################
 
 MODULE_NAME    = 'net_farms_zebrafish'
-RESULTS_PATH   = '/data/pazzagli/simulation_results'
+RESULTS_PATH   = 'simulation_results'
 SIMULATION_TAG = 'dynamic_water_vortices_fixed_head_experimental'
 
-WATER_DYNAMICS_DIR    = '/data/pazzagli/simulation_results/fluid_solver/saved_simulations'
+WATER_DYNAMICS_DIR    = 'simulation_results/fluid_solver/saved_simulations'
 BODY_LENGTH           = default.LENGTH_AXIS_MODEL
 MO_COCONTRACTION_GAIN = 1.0
 MO_COCONTRACTION_OFF  = 0.0
@@ -311,7 +311,7 @@ def _verify_existing_simulation(
     ''' Verify if the simulation file already exists '''
 
     # Ex: (
-    # /data/pazzagli/simulation_results/data/
+    # simulation_results/data/
     # net_farms_zebrafish_dynamic_water_vortices_fixed_head_108_SIM/
     # process_035Hz_distance_050BL_height_005BL_seed_108_closed_loop/
     # snn_performance_process.dill

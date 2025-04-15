@@ -45,7 +45,7 @@ def make_video(
 
 def main():
 
-    restuls_root = '/data/pazzagli/simulation_results/frames'
+    restuls_root = 'simulation_results/frames'
 
     folder_names = [
         # "dynamic_water_vortices_closed_loop_fixed_head_030/20250122-200010",

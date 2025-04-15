@@ -84,7 +84,7 @@ def get_muscle_tag_and_drive_amp_from_muscle_freq(muscle_resonant_freq: float):
 def run(**kwargs):
     ''' Run the spinal cord model together with the mechanical simulator '''
 
-    results_path   = '/data/pazzagli/simulation_results'
+    results_path   = 'simulation_results'
     simulation_tag = 'matching_kinematics_signal_driven'
 
     # Muscle parameters

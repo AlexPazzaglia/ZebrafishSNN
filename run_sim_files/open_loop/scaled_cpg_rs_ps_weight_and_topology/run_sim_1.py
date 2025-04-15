@@ -19,7 +19,7 @@ import network_experiments.default_parameters.zebrafish.open_loop.default as def
 def main():
     ''' Run the spinal cord model together with the mechanical simulator '''
 
-    results_path             = '/data/pazzagli/simulation_results'
+    results_path             = 'simulation_results'
     simulation_data_file_tag = 'scaled_ps_gains'
 
     # Default parameters

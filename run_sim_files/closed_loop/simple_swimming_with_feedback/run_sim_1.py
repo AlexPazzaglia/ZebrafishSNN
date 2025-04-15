@@ -20,7 +20,7 @@ from network_experiments.snn_simulation import simulate_single_net_multi_run_clo
 def main():
     ''' Run the spinal cord model together with the mechanical simulator '''
 
-    results_path             = '/data/pazzagli/simulation_results'
+    results_path             = 'simulation_results'
     simulation_data_file_tag = 'simple_swimming_closed_loop'
 
     # Default parameters

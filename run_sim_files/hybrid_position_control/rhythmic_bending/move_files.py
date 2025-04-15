@@ -16,7 +16,7 @@ def move_files(
 ):
 
     # Simulation tag
-    folder_root    = '/data/pazzagli/simulation_results/images'
+    folder_root    = 'simulation_results/images'
     net_f_str      = str(round(  network_frequency * 100)).zfill(3)  # E.g. 2.50 -> 250
     stm_f_str      = str(round( stimulus_frequency * 100)).zfill(3)  # E.g. 3.75 -> 375
     simulation_tag = f'rhythmic_bending_from_{net_f_str}_to_{stm_f_str}'

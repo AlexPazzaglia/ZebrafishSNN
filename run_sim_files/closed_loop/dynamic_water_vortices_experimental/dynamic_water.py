@@ -456,7 +456,7 @@ class WaterDynamicsCallback(WaterProperties):
 def main():
 
     results_path = (
-        "/data/pazzagli/simulation_results/fluid_solver/"
+        "simulation_results/fluid_solver/"
         "saved_simulations/"
         "2024-10-25T17:25:17.952503_implicit/"
     )

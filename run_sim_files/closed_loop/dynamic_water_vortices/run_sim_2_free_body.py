@@ -86,7 +86,7 @@ def main():
     ''' Run the spinal cord model together with the mechanical simulator '''
 
     # Simulation
-    results_path             = '/data/pazzagli/simulation_results_test'
+    results_path             = 'simulation_results_test'
     simulation_data_file_tag = 'dynamic_water_vortices_closed_loop_free_body'
 
     delay_start = 5.0 # 5.0

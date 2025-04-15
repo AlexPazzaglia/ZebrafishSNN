@@ -19,7 +19,7 @@ def move_files(
     stim_str    = str(round( stim * 1000)).zfill(4)
 
     # Simulation tag
-    folder_root    = '/data/pazzagli/simulation_results/images'
+    folder_root    = 'simulation_results/images'
     simulation_tag = 'net_farms_zebrafish_fictive_schooling_fictive_schooling'
     folder_path    = f'{folder_root}/{simulation_tag}_stim_{stim_str}_{seed}_SIM'
 

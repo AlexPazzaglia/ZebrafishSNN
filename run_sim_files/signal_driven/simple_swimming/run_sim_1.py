@@ -62,7 +62,7 @@ AMP_ARR = np.array(
 def main():
     ''' Run the spinal cord model together with the mechanical simulator '''
 
-    results_path             = '/data/pazzagli/simulation_results_test'
+    results_path             = 'simulation_results_test'
     simulation_data_file_tag = 'simple_swimming'
 
     # Default parameters

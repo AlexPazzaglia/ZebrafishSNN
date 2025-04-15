@@ -17,8 +17,8 @@ def move_target_folders(
 ):
     ''' Collect data from the simulation results and delete the folders '''
 
-    src_folder_root  = '/data/pazzagli/simulation_results/images'
-    dst_folder_root  = '/data/pazzagli/simulation_results/images'
+    src_folder_root  = 'simulation_results/images'
+    dst_folder_root  = 'simulation_results/images'
 
     # Get the simulation parameters
     np_random_seed_vals = set( [ pars['np_random_seed'] for pars in target_parameters_list] )

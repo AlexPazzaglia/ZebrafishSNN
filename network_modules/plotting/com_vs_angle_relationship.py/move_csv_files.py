@@ -14,7 +14,7 @@ def collect_data_and_delete_folders():
     # 3) Move all the .csv files to a single folder
     # 4) Delete the original folders
 
-    results_folder     = '/data/pazzagli/simulation_results_test/data/'
+    results_folder     = 'simulation_results_test/data/'
     farms_folder       = 'process_0/run_0/farms'
     folder_name_root   = 'net_farms_zebrafish_dynamic_water_vortices_closed_loop_fixed_head'
     file_name_root     = 'com_vs_angle_data_'

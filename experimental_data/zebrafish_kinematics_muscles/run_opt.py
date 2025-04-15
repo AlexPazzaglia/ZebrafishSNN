@@ -15,7 +15,7 @@ import muscle_parameters_optimization_sim_params as opt_params
 import muscle_parameters_optimization_runner as opt_runner
 
 # SIMULATION
-RESULTS_PATH = '/data/pazzagli/simulation_results'
+RESULTS_PATH = 'simulation_results'
 
 N_JOINTS_AXIS = 15
 DURATION      = 10.0

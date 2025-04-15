@@ -69,7 +69,7 @@ def main():
     ''' Run the spinal cord model together with the mechanical simulator '''
 
     # Simulation
-    results_path             = '/data/pazzagli/simulation_results'
+    results_path             = 'simulation_results'
     simulation_data_file_tag = 'dynamic_water_vortices_experimental_continuous'
 
     pars = _get_pars(

@@ -40,7 +40,7 @@ def run(
 ):
     ''' Run the spinal cord model together with the mechanical simulator '''
 
-    results_path             = '/data/pazzagli/simulation_results'
+    results_path             = 'simulation_results'
 
     ########################################################
     # CONNECTION PARAMS ####################################

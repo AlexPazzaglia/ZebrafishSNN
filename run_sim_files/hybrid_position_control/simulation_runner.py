@@ -28,7 +28,7 @@ def run(
 ) -> dict[str, np.ndarray]:
     ''' Run the spinal cord model together with the mechanical simulator '''
 
-    results_path  = '/data/pazzagli/simulation_results'
+    results_path  = 'simulation_results'
 
     ########################################################
     # CONNECTIONS PARAMS ###################################
