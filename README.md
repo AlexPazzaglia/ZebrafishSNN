@@ -133,9 +133,18 @@ Scripts for launching and analyzing full zebrafish simulations.
 
 ## 📚 References
 
-- FARMS: Physics Engine for Animat Simulations
-- Neuron models: AdEx, Izhikevich, etc.
-- Optimization with evolutionary algorithms
+- Pazzaglia, Alessandro, et al. "Balancing central control and sensory feedback produces adaptable and robust locomotor patterns in a spiking, neuromechanical model of the salamander spinal cord." PLOS Computational Biology 21.1 (2025): e1012101.
+
+    Paper: https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012101
+
+    Repository: https://github.com/AlexPazzaglia/SalamandraSNN
+
+- Arreguit, Jonathan, Shravan Tata Ramalingasetty, and Auke Ijspeert. "FARMS: framework for animal and robot modeling and simulation." BioRxiv (2025): 2023-09.
+
+    Paper: https://www.biorxiv.org/content/10.1101/2023.09.25.559130v3
+
+    Repository: https://github.com/farmsim
+
 
 ## 📄 License
 
