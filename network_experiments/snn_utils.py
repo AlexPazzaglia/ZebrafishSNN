@@ -23,32 +23,11 @@ import matplotlib.colors as mc
 from datetime import datetime
 
 MODELS_OPENLOOP = {
-    'test'                       : [                       'net_openloop_test',                        'pars_simulation_openloop_test'],
-    '4limb_1dof'                 : [                 'net_openloop_4limb_1dof',                  'pars_simulation_openloop_4limb_1dof'],
-    '4limb_4dof'                 : [                 'net_openloop_4limb_4dof',                  'pars_simulation_openloop_4limb_4dof'],
-    '4limb_1dof_unweighted'      : [      'net_openloop_4limb_1dof_unweighted',       'pars_simulation_openloop_4limb_1dof_unweighted'],
-    '4limb_1dof_plastic'         : [         'net_openloop_4limb_1dof_plastic',          'pars_simulation_openloop_4limb_1dof_plastic'],
-    'zebrafish'                  : [                  'net_openloop_zebrafish',                   'pars_simulation_openloop_zebrafish'],
-    'zebrafish_fictive'          : [          'net_openloop_zebrafish_fictive',           'pars_simulation_openloop_zebrafish_fictive'],
-    'zebrafish_experimental'     : [              'net_openloop_zebrafish_exp',               'pars_simulation_openloop_zebrafish_exp'],
-    'zebrafish_simplified'       : [       'net_openloop_zebrafish_simplified',        'pars_simulation_openloop_zebrafish_simplified'],
-    'zebrafish_v1'               : [       'net_openloop_zebrafish_simplified',                'pars_simulation_openloop_zebrafish_v1'],
-    'single_segment'             : [             'net_openloop_single_segment',              'pars_simulation_openloop_single_segment'],
-    'salamandra_fictive'         : [         'net_openloop_4limb_1dof_fictive',          'pars_simulation_openloop_salamandra_fictive'],
-    'salamandra_fictive_limbless': ['net_openloop_salamandra_fictive_limbless', 'pars_simulation_openloop_salamandra_fictive_limbless'],
+    'zebrafish_experimental': ['net_openloop_zebrafish_exp', 'pars_simulation_openloop_zebrafish_exp'],
 }
 
 MODELS_FARMS = {
-    'test'                  : [                 'net_farms_test',                  'pars_simulation_farms_test'],
-    '4limb_1dof'            : [           'net_farms_4limb_1dof',            'pars_simulation_farms_4limb_1dof'],
-    '4limb_1dof_unweighted' : ['net_farms_4limb_1dof_unweighted', 'pars_simulation_farms_4limb_1dof_unweighted'],
-    '4limb_1dof_plastic'    : [   'net_farms_4limb_1dof_plastic',    'pars_simulation_farms_4limb_1dof_plastic'],
-    '4limb_4dof'            : [           'net_farms_4limb_4dof',            'pars_simulation_farms_4limb_4dof'],
-    'salamandra_limbless'   : [             'net_farms_limbless',              'pars_simulation_farms_limbless'],
-    'zebrafish'             : [            'net_farms_zebrafish',             'pars_simulation_farms_zebrafish'],
-    'zebrafish_fictive'     : [    'net_farms_zebrafish_fictive',     'pars_simulation_farms_zebrafish_fictive'],
-    'zebrafish_simplified'  : [ 'net_farms_zebrafish_simplified',  'pars_simulation_farms_zebrafish_simplified'],
-    'zebrafish_experimental': [        'net_farms_zebrafish_exp',         'pars_simulation_farms_zebrafish_exp'],
+    'zebrafish_experimental': ['net_farms_zebrafish_exp', 'pars_simulation_farms_zebrafish_exp'],
 }
 
 ###############################################################################

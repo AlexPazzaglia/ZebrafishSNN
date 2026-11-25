@@ -1,7 +1,8 @@
 # Simulation scripts
 
 Simulations and analyses of Picton, Madrid, Pazzaglia et al.,
-*A spinal circuit for collective coordination*.
+[*A spinal circuit for collective coordination*](https://arxiv.org/abs/2608.25909),
+arXiv:2608.25909 (2026).
 
 All scripts must be launched **from the repository root**, e.g.
 
@@ -100,6 +101,6 @@ post-processing is kept.
 |---|---|
 | Neuron model parameters from intrinsic properties | [`experimental_data/zebrafish_neural_data_processing`](../experimental_data/zebrafish_neural_data_processing) |
 | Synaptic weights (open-loop oscillations of the isolated network) | [`model_calibration/open_loop_network`](model_calibration/open_loop_network) |
-| Drag coefficients (replaying the kinematics in position control) | [`experimental_data/zebrafish_kinematics_drag`](../experimental_data/zebrafish_kinematics_drag) |
+| Drag coefficients | Calibrated values stored per link in [`animat.yaml`](../farms_experiments/experiments/zebrafish_v1_spiking_swimming/animat.yaml) |
 | Muscle parameters (natural frequency, damping ratio, zero-frequency gain) | [`experimental_data/zebrafish_kinematics_muscles`](../experimental_data/zebrafish_kinematics_muscles) |
 | Motor output gains (G<sub>MC</sub>) | [`model_calibration/motor_output_gains`](model_calibration/motor_output_gains) |

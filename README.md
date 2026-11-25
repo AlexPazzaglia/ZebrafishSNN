@@ -72,7 +72,7 @@ changed with environment variables:
 ## 📄 Reproducing *A spinal circuit for collective coordination*
 
 The simulations and analyses of the computational part of
-Picton, Madrid, Pazzaglia et al., *A spinal circuit for collective coordination*
+Picton, Madrid, Pazzaglia et al., [*A spinal circuit for collective coordination*](https://arxiv.org/abs/2608.25909)
 are listed, figure by figure, in [`run_sim_files/README.md`](run_sim_files/README.md):
 
 - `model_calibration/` – Calibration of the network weights and of the motor output gains
@@ -91,7 +91,6 @@ fish (see [`run_sim_files/README.md`](run_sim_files/README.md#vortex-matching-si
 ### `experimental_data/`
 Contains real and synthetic data used for calibration, validation, and analysis.
 
-- `zebrafish_kinematics_drag/` – Calibrate the drag coefficients by replaying the zebrafish kinematics in position control.
 - `zebrafish_kinematics_muscles/` – Optimize the muscle parameters for a target natural frequency, damping ratio and zero-frequency gain.
 - `zebrafish_neural_data_processing/` – Fit the neuron models (V2a, V0d, MN, PS) to the measured intrinsic properties.
 
@@ -101,22 +100,21 @@ Contains real and synthetic data used for calibration, validation, and analysis.
 Experiments integrating the [FARMS simulator](https://github.com/epfl-lcn/farms) with zebrafish models.
 
 - `experiments/` – YAML configurations for SNN vs. position-controlled swimming.
-- `maps/` – Flow map generation for swimming arenas.
 - `models/` – SDF models for zebrafish and environments.
 
 ---
 
 ### `network_experiments/`
-Experiments for neural network simulation, training, and sensitivity analysis.
+Simulation setup and execution of the neuromechanical model.
 
-- SNN training with evolutionary optimization
-- Logging and profiling tools
-- Signal simulation and analysis utilities
+- Default parameters of the zebrafish model for each control mode
+- Simulation runners, post-processing and logging
+- Paths of the simulation results (`snn_paths.py`)
 
 ---
 
 ### `network_implementations/`
-SNN models for open-loop and closed-loop simulations.
+Reference network implementations and connectivity schemes of the zebrafish model.
 
 ---
 
@@ -145,11 +143,8 @@ Modular YAML files for network, simulation, and mechanical configurations.
 ---
 
 ### `neuron_experiments/`
-Experiments for characterizing neuron and synapse behavior.
-
-- Gain functions
-- Current step responses
-- Visualization of individual neuron dynamics
+Single-neuron simulations used to fit the neuron models to the experimental
+intrinsic properties (used by `experimental_data/zebrafish_neural_data_processing/`).
 
 ---
 
@@ -165,7 +160,9 @@ Simulations and analyses of the paper (see [`run_sim_files/README.md`](run_sim_f
 
 ## 📚 References
 
-- Picton, L.D., Madrid, D., Pazzaglia, A., et al. "A spinal circuit for collective coordination." (2026).
+- Picton, Laurence, David Madrid, Alessandro Pazzaglia, et al. "A spinal circuit for collective coordination." arXiv preprint arXiv:2608.25909 (2026).
+
+    Paper: https://arxiv.org/abs/2608.25909
 
 - Pazzaglia, Alessandro, et al. "Balancing central control and sensory feedback produces adaptable and robust locomotor patterns in a spiking, neuromechanical model of the salamander spinal cord." PLOS Computational Biology 21.1 (2025): e1012101.
 
@@ -178,6 +175,27 @@ Simulations and analyses of the paper (see [`run_sim_files/README.md`](run_sim_f
     Paper: https://www.biorxiv.org/content/10.1101/2023.09.25.559130v3
 
     Repository: https://github.com/farmsim
+
+
+## 📝 Citation
+
+If you use this code, please cite:
+
+```bibtex
+@misc{picton2026spinal,
+  title         = {A spinal circuit for collective coordination},
+  author        = {Picton, Laurence and Madrid, David and Pazzaglia, Alessandro and Wang, Yutong and
+                   Bertuzzi, Maria and Ferrario, Andrea and Anastasiadis, Alexandros and Arreguit, Jonathan and
+                   Fontanel, Pierre and Huang, Chun-Xiao and Mulleners, Karen and Song, Jianren and
+                   Ijspeert, Auke Jan and El Manira, Abdel},
+  year          = {2026},
+  eprint        = {2608.25909},
+  archivePrefix = {arXiv},
+  primaryClass  = {q-bio.NC},
+  doi           = {10.48550/arXiv.2608.25909},
+  url           = {https://arxiv.org/abs/2608.25909},
+}
+```
 
 
 ## 📄 License
