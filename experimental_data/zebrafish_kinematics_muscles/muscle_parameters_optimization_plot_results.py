@@ -220,7 +220,7 @@ def main():
     # TARGET PARAMETERS
     target_g0 = 2*np.pi/ n_joints_axis
     target_zc = 1.00
-    target_fn = 20.0
+    target_fn = 50.0
 
     # OPTIMIZATION
     starting_iteration = None

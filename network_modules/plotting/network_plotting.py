@@ -736,17 +736,35 @@ class SnnPlotting(SnnPerformance):
 
         ner_name     = cycle_freq_plot_pars['ner_name']
         ner_activity = self.smooth_activations.get(ner_name)
+        mod_tag      = ner_name.upper()
 
         if ner_activity is None:
             return
 
+        # Use cubic spline interpolated signals
         times   = ner_activity['times']
         signals = ner_activity['spike_count']
-        mod_tag = ner_name.upper()
 
+        # Use filtered raw signals
+        from scipy.signal import butter, filtfilt
+
+        times_r   = ner_activity['times_raw']
+        signals_r = ner_activity['spike_count_raw']
+        freq_mean = self.metrics['neur_freq_ax']
+        freq_nyq  = 0.5 / (times_r[1] - times_r[0])
+
+        b, a = butter(
+            N     = 4,
+            Wn    = (3 * freq_mean) / freq_nyq,
+            btype = 'low'
+        )
+
+        signals_r = filtfilt(b, a, signals_r, axis=1)
+
+        # Plot
         fig_list = snn_plotting.plot_spike_count_cycle_frequencies_evolution(
-            times       = times,
-            signals     = signals,
+            times       = times_r,
+            signals     = signals_r,
             module_name = mod_tag,
             close       = cycle_freq_plot_pars['close'],
             save        = cycle_freq_plot_pars['save'],

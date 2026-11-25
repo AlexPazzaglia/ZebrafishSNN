@@ -41,8 +41,12 @@ monitor_pools_activation :
       ner_name     : mn
       smooth_factor: 0.999
 
+    - mod_name     : ps
+      ner_name     : ps
+      smooth_factor: 0.999
+
   plotpars :
-    showit        : False
+    showit        : True
     densegrid     : False
     gridon        : False
     animate       : False
@@ -104,7 +108,7 @@ monitor_musclecells :
   variables: [v, I_tot]           # g_ampa_mc_tot, g_nmda_mc_tot, I_tot
   rate     : 1                    # Multiple of simulation timestep
   plotpars :
-    showit        : False
+    showit        : True
     filtering     : False
     sampling_ratio: 0.50
     duty_cycle_ax :

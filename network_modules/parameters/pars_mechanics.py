@@ -51,6 +51,8 @@ class SnnParsMechanics(SnnPars):
         self.__mech_axial_joints_position : tuple[float] =  tuple( self.pars.pop('mech_axial_joints_position') )
         self.__mech_limbs_joints_position : tuple[float] =  tuple( self.pars.pop('mech_limbs_joints_position') )
 
+        self.__mech_links_masses : tuple[float] =  tuple( self.pars.pop('mech_links_masses') )
+
         self.__lb_offset_swim : tuple[tuple[float]] =  tuple( self.pars.pop('lb_offset_swim') )
         self.__lb_offset_walk : tuple[tuple[float]] =  tuple( self.pars.pop('lb_offset_walk') )
 
@@ -295,6 +297,7 @@ class SnnParsMechanics(SnnPars):
     mech_pca_joints            : int                 = SnnPars.read_only_attr('mech_pca_joints')
     mech_axial_joints          : int                 = SnnPars.read_only_attr('mech_axial_joints')
     mech_limbs_joints          : int                 = SnnPars.read_only_attr('mech_limbs_joints')
+    mech_links_masses          : tuple[float]        = SnnPars.read_only_attr('mech_links_masses')
     mech_joints_silenced       : tuple[int]          = SnnPars.read_only_attr('mech_joints_silenced')
     mech_lb_joints_lead        : tuple[int]          = SnnPars.read_only_attr('mech_lb_joints_lead')
     mech_lb_joints_foll        : tuple[int]          = SnnPars.read_only_attr('mech_lb_joints_foll')

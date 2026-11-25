@@ -509,15 +509,57 @@ class ZebrafishProperties():
 
     # SAVING
 
+    def _map_time_to_steady_loop(
+        self,
+        time       : float,
+        steady_loop: dict,
+    ):
+        ''' Map a time instant to the periodic (steady-state) loop of the flow '''
+        time0 = steady_loop['time0']
+
+        # Keep time before the loop
+        if time < time0:
+            return time
+
+        # Map time to the steady loop
+        loop_duration = steady_loop['duration']
+        cycle_ratio   = (time - time0) / loop_duration
+        cycle_frac    = cycle_ratio - np.floor(cycle_ratio)
+        time_loop     = cycle_frac * loop_duration
+        time          = time0 + time_loop
+        return time
+
+    def _map_times_to_steady_loop(
+        self,
+        times      : np.ndarray,
+        steady_loop: dict,
+    ):
+        ''' Map the times to the steady loop '''
+        return np.array(
+            [
+                self._map_time_to_steady_loop(t, steady_loop)
+                for t in times
+            ]
+        )
+
     def get_coordinates_evolution(
         self,
         times,
         signal_amp_fun,
         signal_phase_fun,
-        n_points = 10,
-        normalize = True,
+        n_points    = 10,
+        normalize   = True,
+        steady_loop = None,
     ):
         ''' Get the evolution of the coordinates '''
+
+        if steady_loop is not None:
+            # Map the times to the steady loop
+            times = self._map_times_to_steady_loop(
+                times,
+                steady_loop,
+            )
+
         n_steps               = len(times)
         s_vals                = np.linspace(0, 1, n_points)
         positions_x_evolution = np.array([s_vals] * n_steps)

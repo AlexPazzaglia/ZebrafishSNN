@@ -33,7 +33,7 @@
 - Clone ZebrafishSNN repository within the ProjectSNN folder:
 
     ```bash
-    git clone git@gitlab.com:alessandro.pazzaglia/ZebrafishSNN.git
+    git clone git@github.com:AlexPazzaglia/ZebrafishSNN.git
     ```
 
 - Enter ZebrafishSNN folder and install requirements:
@@ -51,15 +51,49 @@
     pip install -e farms_amphibious
     ```
 
+## ▶️ Running simulations
+
+All scripts are launched **from the repository root**, e.g.
+
+```bash
+python run_sim_files/ex_vivo_simulations/static_bending/run_static_bending.py
+```
+
+Output locations are defined in `network_experiments/snn_paths.py` and can be
+changed with environment variables:
+
+| Variable | Content | Default |
+|---|---|---|
+| `ZEBRAFISH_SNN_RESULTS` | Raw simulation outputs | `<repository>/simulation_results` |
+| `ZEBRAFISH_SNN_ANALYSIS` | Curated results read by the post-processing | `$ZEBRAFISH_SNN_RESULTS/analysis` |
+| `ZEBRAFISH_SNN_WATER_DYNAMICS` | Pre-computed leader-wake flow fields | `$ZEBRAFISH_SNN_RESULTS/fluid_solver/saved_simulations` |
+
+
+## 📄 Reproducing *A spinal circuit for collective coordination*
+
+The simulations and analyses of the computational part of
+Picton, Madrid, Pazzaglia et al., *A spinal circuit for collective coordination*
+are listed, figure by figure, in [`run_sim_files/README.md`](run_sim_files/README.md):
+
+- `model_calibration/` – Calibration of the network weights and of the motor output gains
+- `ex_vivo_simulations/` – In silico counterpart of the ex vivo (paralysed) preparations:
+  static bending, pacing (Fig. 3F–H) and fictive schooling (Fig. 3I–J)
+- `in_vivo_simulations/` – In silico counterpart of the freely swimming fish:
+  proprioception ON vs OFF, vortex phase matching (Fig. 4A–F), energy consumption
+  (Fig. 4L–M) and vortex phase matching across muscle stiffness
+
+The vortex-matching simulations require the pre-computed wake of the leader
+fish (see [`run_sim_files/README.md`](run_sim_files/README.md#vortex-matching-simulations)).
+
+
 ## 📁 Project Structure
 
 ### `experimental_data/`
 Contains real and synthetic data used for calibration, validation, and analysis.
 
-- `zebrafish_kinematics/` – Compute and simulate body angles during position control.
-- `zebrafish_kinematics_drag/` – Study drag effects across different swimming frequencies.
-- `zebrafish_kinematics_muscles/` – Optimize muscle parameters using dynamic simulations and genetic algorithms.
-- `zebrafish_neural_data_processing/` – Analyze intrinsic neuronal properties and optimize neuron models.
+- `zebrafish_kinematics_drag/` – Calibrate the drag coefficients by replaying the zebrafish kinematics in position control.
+- `zebrafish_kinematics_muscles/` – Optimize the muscle parameters for a target natural frequency, damping ratio and zero-frequency gain.
+- `zebrafish_neural_data_processing/` – Fit the neuron models (V2a, V0d, MN, PS) to the measured intrinsic properties.
 
 ---
 
@@ -120,18 +154,18 @@ Experiments for characterizing neuron and synapse behavior.
 ---
 
 ### `run_sim_files/`
-Scripts for launching and analyzing full zebrafish simulations.
+Simulations and analyses of the paper (see [`run_sim_files/README.md`](run_sim_files/README.md)).
 
-- `open_loop/` – Run the spiking neural network in isolation without mechanical model
-- `position_control/` – Run the mechanical model in isolation with the desired kinematics
-- `signal_driven/` – Run the mechanical model in isolation with the desired muscles activation
-- `hybrid_position_control/` – Run the neural network receiving sensory feedback from the position-controlled mechanical body
-- `closed_loop/` – Run the neural network controlling the mechanical body via muscles.
+- `model_calibration/` – Isolated network (`open_loop_network/`) and motor output gains (`motor_output_gains/`)
+- `ex_vivo_simulations/` – The muscles are silenced and the body is bent in position control, while the network receives sensory feedback (`static_bending/`, `in_silico_pacing/`, `in_silico_schooling/`)
+- `in_vivo_simulations/` – The network controls the body through the muscles and receives sensory feedback (`proprioception_on_off/`, `vortex_matching/`)
 
 ---
 
 
 ## 📚 References
+
+- Picton, L.D., Madrid, D., Pazzaglia, A., et al. "A spinal circuit for collective coordination." (2026).
 
 - Pazzaglia, Alessandro, et al. "Balancing central control and sensory feedback produces adaptable and robust locomotor patterns in a spiking, neuromechanical model of the salamander spinal cord." PLOS Computational Biology 21.1 (2025): e1012101.
 

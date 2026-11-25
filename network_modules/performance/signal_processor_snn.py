@@ -342,7 +342,7 @@ def compute_smooth_activation_module(
     ) -> tuple[np.ndarray, np.ndarray]:
     ''' Convert the spike trains in a continuous curve representing the activation '''
 
-    times, spike_count = compute_spike_count_module(
+    times_raw, spike_count_raw = compute_spike_count_module(
         spikemon_t = spikemon_t,
         spikemon_i = spikemon_i,
         dt_sig     = dt_sig,
@@ -357,14 +357,14 @@ def compute_smooth_activation_module(
     times_f   = np.linspace(0, duration, n_steps_f)
 
     spike_count_f = csaps(
-        xdata  = times,
-        ydata  = spike_count,
+        xdata  = times_raw,
+        ydata  = spike_count_raw,
         xidata = times_f,
         smooth = smooth_factor,
         axis   = 1
     )
 
-    return times_f, spike_count_f
+    return times_f, spike_count_f, times_raw, spike_count_raw
 
 def compute_smooth_activation_all(
     spikemon: b2.SpikeMonitor,
@@ -762,6 +762,7 @@ def compute_hilb_transform(
 
     if mean_freq is not None:
         f_low, f_high = mean_freq * 0.5, mean_freq * 1.5
+        # f_low, f_high = mean_freq * 0.5, mean_freq * 2.0
     else:
         f_low, f_high = 0.5, 10.0
 

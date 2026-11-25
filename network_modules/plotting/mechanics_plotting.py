@@ -92,26 +92,26 @@ class MechPlotting(MechPerformance):
         figures_dict = self.snn_network.figures if figures_dict is None else figures_dict
 
         # Plot links y position
-        axis_length = self.snn_network.params.mechanics.mech_axial_length
-        links_pos   = self.all_metrics_data['links_positions']
-        links_y_pos = links_pos[:, :, 1] / axis_length
-        colors      = plt.cm.jet(np.linspace(0, 1, links_pos.shape[1]))
+        axis_length  = self.snn_network.params.mechanics.mech_axial_length
+        points_pos   = self.all_metrics_data['points_positions']
+        points_y_pos = points_pos[:, :, 1] / axis_length
+        colors       = plt.cm.jet(np.linspace(0, 1, points_pos.shape[1]))
 
-        fig_links_y = plt.figure('Links y position')
-        axis        = fig_links_y.add_subplot(111)
+        fig_points_y = plt.figure('Links y position')
+        axis         = fig_points_y.add_subplot(111)
 
         for i, color in enumerate(colors):
 
             axis.plot(
-                links_y_pos[:, i],
+                points_y_pos[:, i],
                 color = color,
             )
 
         axis.set_xlabel('Time [s]')
         axis.set_ylabel('Position [BL]')
-        axis.set_title('Links y position')
+        axis.set_title('Points y position')
 
-        figures_dict['fig_links_y'] = fig_links_y
+        figures_dict['fig_points_y'] = fig_points_y
 
         # Plots
         self._plot_joints_angles_amps(figures_dict)
@@ -176,7 +176,7 @@ class MechPlotting(MechPerformance):
         mech_pars   = self.snn_network.params.mechanics
         length_body = mech_pars.mech_axial_length
 
-        links_disp_amps_bl = metrics['mech_links_disp_amp_bl']
+        links_disp_amps_bl = metrics['mech_points_disp_amp_bl']
 
         joints_axial_pos    = np.array(mech_pars.mech_axial_joints_position)
         points_axial_pos    = np.array([0] + joints_axial_pos.tolist() + [length_body])
@@ -306,9 +306,9 @@ class MechPlotting(MechPerformance):
         if not plotpars['trajectory_fit']:
             return
 
-        disp_data = self.all_metrics_data['links_displacements_data']
+        disp_data = self.all_metrics_data['points_displacements_data']
         figures_dict['fig_traj_fit'] = signal_processor_mech_plot.plot_trajectory_fit(
-            links_pos_xy               = disp_data['links_positions'],
+            links_pos_xy               = disp_data['points_positions'],
             direction_fwd              = disp_data['direction_fwd'],
             direction_left             = disp_data['direction_left'],
             quadratic_fit_coefficients = disp_data['quadratic_fit_coefficients'],
@@ -967,7 +967,7 @@ class MechPlotting(MechPerformance):
         if not anim_pars or not anim_pars['active']:
             return
 
-        links_positions = np.copy( self.links_positions )
+        links_positions = np.copy( self.points_positions )
         if not links_positions[-1].any():
             links_positions  = links_positions[:-1]
 
@@ -976,8 +976,9 @@ class MechPlotting(MechPerformance):
         times        = np.arange(0, timestep*n_iterations, timestep)
 
         water_parameters = {
-            'water_maps'    : self.water_map_parameters,
-            'water_dynamics': self.water_dynamics_options,
+            'water_maps'          : self.water_map_parameters,
+            'water_dynamics'      : self.water_dynamics_options,
+            'spring_damper_params': self.spring_damper_properties,
         }
 
         fig_lt = plt.figure('Link trajectory animation')

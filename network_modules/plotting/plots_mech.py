@@ -10,6 +10,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
+from scipy.interpolate import interp1d
 from scipy.ndimage import gaussian_filter
 from typing import Tuple
 from matplotlib.animation import FuncAnimation
@@ -84,6 +85,53 @@ def _plot_mech_signals(
 
     return fig
 
+def _get_vorticity_field(
+    time           : float,
+    water_speed_fun: callable,
+    xlims          : Tuple[float, float],
+    ylims          : Tuple[float, float],
+    n_speeds_dyn   : int = 100,
+    max_vorticity  : float = 15,
+    filter_sigma   : float = 3.0,
+):
+    ''' Compute vorticity field from water dynamics '''
+
+    # Compute limits
+    xmin, xmax = xlims
+    ymin, ymax = ylims
+    xvals_dyn  = np.linspace(xmin, xmax, n_speeds_dyn)
+    yvals_dyn  = np.linspace(ymin, ymax, n_speeds_dyn)
+
+    # Compute water speed field
+    water_vx = np.zeros((n_speeds_dyn, n_speeds_dyn))
+    water_vy = np.zeros((n_speeds_dyn, n_speeds_dyn))
+    for i, x in enumerate(xvals_dyn):
+        for j, y in enumerate(yvals_dyn):
+            water_vx[j, i], water_vy[j, i], _ = water_speed_fun(time, x, y, 0)
+
+    # All speeds are zero
+    water_vt2 = water_vx**2 + water_vy**2
+    if not np.any(water_vt2):
+        return None
+
+    # Grid spacings
+    dx = (xmax - xmin) / (n_speeds_dyn - 1)
+    dy = (ymax - ymin) / (n_speeds_dyn - 1)
+
+    # Compute partial derivatives using finite differences
+    # NOTE: water_vx[:, 256] will vary along the y-axis
+    dvdx = np.gradient(water_vy, dx, axis=1)  # ∂v/∂x
+    dudy = np.gradient(water_vx, dy, axis=0)  # ∂u/∂y
+
+    # Compute vorticity
+    vorticity = dvdx - dudy
+
+    # Process vorticity
+    vorticity_processed = gaussian_filter(vorticity, sigma=filter_sigma)
+    vorticity_processed = np.clip(vorticity_processed, -max_vorticity, max_vorticity)
+
+    return vorticity_processed, xvals_dyn, yvals_dyn
+
 def _plot_water_map(
     axis            : plt.Axes,
     water_parameters: dict,
@@ -125,41 +173,24 @@ def _plot_water_dynamics(
     water_dyn_pars  = water_parameters['water_dynamics']
     water_speed_fun = water_dyn_pars['velocity_callback']
 
-    # Compute limits
-    xmin, xmax = xlims
-    ymin, ymax = ylims
-    xvals_dyn  = np.linspace(xmin, xmax, n_speeds_dyn)
-    yvals_dyn  = np.linspace(ymin, ymax, n_speeds_dyn)
+    # Get vorticity field
+    max_vorticity = 15
+    filter_sigma  = 3.0
 
-    # Compute water speed field
-    water_vx = np.zeros((n_speeds_dyn, n_speeds_dyn))
-    water_vy = np.zeros((n_speeds_dyn, n_speeds_dyn))
-    for i, x in enumerate(xvals_dyn):
-        for j, y in enumerate(yvals_dyn):
-            water_vx[j, i], water_vy[j, i], _ = water_speed_fun(time, x, y, 0)
+    vorticity_data = _get_vorticity_field(
+        time           = time,
+        water_speed_fun= water_speed_fun,
+        xlims          = xlims,
+        ylims          = ylims,
+        n_speeds_dyn   = n_speeds_dyn,
+        max_vorticity  = max_vorticity,
+        filter_sigma   = filter_sigma,
+    )
 
-    # All speeds are zero
-    water_vt2 = water_vx**2 + water_vy**2
-    if not np.any(water_vt2):
+    if vorticity_data is None:
         return None
 
-    # Grid spacings
-    dx = (xmax - xmin) / (n_speeds_dyn - 1)
-    dy = (ymax - ymin) / (n_speeds_dyn - 1)
-
-    # Compute partial derivatives using finite differences
-    # NOTE: water_vx[:, 256] will vary along the y-axis
-    dvdx = np.gradient(water_vy, dx, axis=1)  # ∂v/∂x
-    dudy = np.gradient(water_vx, dy, axis=0)  # ∂u/∂y
-
-    # Compute vorticity
-    vorticity = dvdx - dudy
-
-    # Process vorticity
-    max_vorticity       = 15
-    filter_sigma        = 3.0
-    vorticity_processed = gaussian_filter(vorticity, sigma=filter_sigma)
-    vorticity_processed = np.clip(vorticity_processed, -max_vorticity, max_vorticity)
+    vorticity_field, x_vals, y_vals = vorticity_data
 
     # Define vorticity range
     levels = np.linspace(-max_vorticity, max_vorticity, 101)
@@ -198,9 +229,9 @@ def _plot_water_dynamics(
     # )
 
     vorticity_plot = axis.contourf(
-        xvals_dyn,
-        yvals_dyn,
-        vorticity_processed,
+        x_vals,
+        y_vals,
+        vorticity_field,
         cmap   = custom_cmap,
         norm   = custom_norm,
         alpha  = 0.7,
@@ -578,16 +609,201 @@ def _inizialize_links_trajectory_animation(
             thickness_type = thickness_type,
         )
 
+
+    # # Compute local fluid speed values
+    # fluid_speed = _get_fluid_speed_at_links(
+    #     plotted_step     = plotted_step,
+    #     times            = times,
+    #     links_x          = links_x,
+    #     links_y          = links_y,
+    #     water_parameters = water_parameters,
+    # )
+
+    # # Compute link speeds
+    # link_speed = _get_links_speed(
+    #     plotted_step = plotted_step,
+    #     times        = times,
+    #     links_x      = links_x,
+    #     links_y      = links_y,
+    # )
+
+    # # Compute dot product (F · v) for each link and timestep
+    # dot_products = np.sum(link_speed * fluid_speed, axis=-1)
+
+    # norm1 = np.linalg.norm( link_speed, axis=-1)
+    # norm2 = np.linalg.norm(fluid_speed, axis=-1)
+
+    # mask          = (norm1 > 0) & (norm2 > 0)
+    # scaling       = np.ones_like(dot_products)
+    # scaling[mask] = norm1[mask] * norm2[mask]
+    # coherence     = dot_products / scaling
+
+    # # # Apply 3-point moving average with zero padding
+    # # kernel           = np.ones(3) / 3.0
+    # # coherence_padded = np.pad(coherence, (1, 1), mode='constant', constant_values=0)
+    # # coherence        = np.convolve(coherence_padded, kernel, mode='valid'
+
+    # # # Compute local vorticity values
+    # # vorticity = _get_fluid_vorticity_at_links(
+    # #     plotted_step     = plotted_step,
+    # #     times            = times,
+    # #     points_x         = links_x,
+    # #     points_y         = links_y,
+    # #     water_parameters = water_parameters,
+    # # )
+
+    # # # Compute angular speeds
+    # # ang_speed = _get_links_angular_speed(
+    # #     plotted_step = plotted_step,
+    # #     times        = times,
+    # #     links_x      = links_x,
+    # #     links_y      = links_y,
+    # # )
+
+    # # Provide color values in [0, 1] range
+    # # color_values = 0.5 * ( (ang_speed * vorticity) + 1.0)
+    # color_values = 0.5 * ( (coherence) + 1.0)
+
     # Plot simulated fish configuration
     fish_lines = plot_fish_configuration(
         axis           = ax1,
         positions_x    = links_x[plotted_step, :],
         positions_y    = links_y[plotted_step, :],
+        color_values   = None,
         axis_lines     = None,
         thickness_type = thickness_type,
     )
 
     return ax1, time_text, quiver_plot, fish_lines, ref_lines
+
+
+def _get_fluid_speed_at_links(
+    plotted_step    : int,
+    times           : np.ndarray,
+    links_x         : np.ndarray,
+    links_y         : np.ndarray,
+    water_parameters: dict,
+    remove_constant : bool = True,
+):
+    ''' Compute fluid speed at each link COM position '''
+
+    # Compute local vorticity values
+    n_links         = links_x.shape[1]
+    curr_time       = times[plotted_step]
+    water_speed_fun = water_parameters['water_dynamics']['velocity_callback']
+    velocities      = np.zeros((n_links, 2))
+
+    for i in range(n_links):
+
+        # Compute water speed
+        x       = links_x[plotted_step, i]
+        y       = links_y[plotted_step, i]
+        u, v, _ = water_speed_fun(curr_time, x, y, 0)
+
+        velocities[i, 0], velocities[i, 1] = u, v
+
+    if remove_constant:
+        constant_speed  = water_speed_fun(0.0, np.inf, np.inf, 0)
+        velocities     -= constant_speed[:2]
+
+    return velocities
+
+def _get_fluid_vorticity_at_links(
+    plotted_step    : int,
+    times           : np.ndarray,
+    points_x        : np.ndarray,
+    points_y        : np.ndarray,
+    water_parameters: dict,
+):
+    ''' Compute fluid vorticity at each link COM position '''
+
+    # Compute local vorticity values
+    dx, dy          = 0.001, 0.001
+    n_links         = points_x.shape[1] - 1
+    curr_time       = times[plotted_step]
+    water_speed_fun = water_parameters['water_dynamics']['velocity_callback']
+    vorticity       = np.zeros(n_links)
+
+    for i in range(n_links):
+
+        x_pre = points_x[plotted_step, i]
+        y_pre = points_y[plotted_step, i]
+
+        x_post = points_x[plotted_step, i + 1]
+        y_post = points_y[plotted_step, i + 1]
+
+        x = 0.5 * (x_pre + x_post)
+        y = 0.5 * (y_pre + y_post)
+
+        # Compute water speed at neighboring points
+        _, v_x0, _ = water_speed_fun(curr_time, x - dx, y, 0)
+        _, v_x1, _ = water_speed_fun(curr_time, x + dx, y, 0)
+
+        u_y0, _, _ = water_speed_fun(curr_time, x, y - dy, 0)
+        u_y1, _, _ = water_speed_fun(curr_time, x, y + dy, 0)
+
+        dvdx = (v_x1 - v_x0) / (2 * dx)
+        dudy = (u_y1 - u_y0) / (2 * dy)
+
+        # Compute vorticity at the link position
+        vorticity[i] = dvdx - dudy
+
+    # Normalize vorticity
+    max_vort  = 2.0
+    vorticity = np.clip(vorticity, -max_vort, max_vort) / max_vort
+
+    return vorticity
+
+def _get_links_speed(
+    plotted_step: int,
+    times       : np.ndarray,
+    links_x     : np.ndarray,
+    links_y     : np.ndarray,
+):
+    ''' Compute speeds of each link '''
+
+    # Compute speeds
+    timestep = times[1] - times[0]
+    step_0   = max(plotted_step - 1, 0)
+    step_1   = min(plotted_step + 1, len(times) - 1)
+
+    pos_0 = np.array( [links_x[step_0], links_y[step_0]] ).T
+    pos_1 = np.array( [links_x[step_1], links_y[step_1]] ).T
+
+    speed = (pos_1 - pos_0) / (step_1 - step_0) / timestep
+
+    return speed
+
+def _get_links_angular_speed(
+    plotted_step: int,
+    times       : np.ndarray,
+    links_x     : np.ndarray,
+    links_y     : np.ndarray,
+):
+    ''' Compute angular speeds of each link '''
+
+    # Compute angular speeds
+    timestep = times[1] - times[0]
+    step_0   = max(plotted_step - 1, 0)
+    step_1   = min(plotted_step + 1, len(times) - 1)
+
+    pos_0 = np.array( [links_x[step_0], links_y[step_0]] ).T
+    pos_1 = np.array( [links_x[step_1], links_y[step_1]] ).T
+
+    arr_0 = pos_0[1:] - pos_0[:-1]
+    arr_1 = pos_1[1:] - pos_1[:-1]
+
+    cos = np.sum( arr_0 * arr_1, axis=1 )
+    sin = np.cross( arr_0, arr_1 )
+
+    ang_speed = np.arctan2(sin, cos) / (step_1 - step_0) / timestep
+
+    # Normalize angular speeds
+    max_speed = 2.0
+    ang_speed = np.clip(ang_speed, -max_speed, max_speed) / max_speed
+
+    return ang_speed
+
 
 def _plot_links_trajectory_animation_single_frame(
     anim_step  : int,
@@ -613,6 +829,21 @@ def _plot_links_trajectory_animation_single_frame(
         reference_x      = plot_params.get('reference_x', None),
         reference_y      = plot_params.get('reference_y', None),
     )
+
+
+    # Plot rectangle representing the spring inactive band
+    spring_rectangle = plot_params.get('spring_rectangle')
+    if spring_rectangle:
+        min_x, max_x = spring_rectangle['min_x'], spring_rectangle['max_x']
+        min_y, max_y = spring_rectangle['min_y'], spring_rectangle['max_y']
+
+        plt.plot(
+            [ min_x, max_x, max_x, min_x, min_x,],
+            [ min_y, min_y, max_y, max_y, min_y,],
+            linewidth = 1,
+            linestyle = '--',
+            color     = 'red',
+        )
 
     # Update time text
     sim_fraction = 100 * anim_step / plot_params['steps_max']
@@ -729,6 +960,29 @@ def _save_links_trajectory_animation_frames(
             ]
         )
 
+    # Spring-damper
+    if water_parameters.get('spring_damper_params'):
+        spring_damper_params = water_parameters['spring_damper_params']
+        spring_fixed_point   = spring_damper_params['fixed_point']
+        spring_rest_length   = spring_damper_params['rest_length']
+        spring_inactive_band = spring_damper_params['inactive_band']
+
+
+        # Define rectangle based on fixed point position and inactive band
+        rect_min_x = spring_fixed_point[0] - spring_inactive_band[0]
+        rect_max_x = spring_fixed_point[0] + spring_inactive_band[0]
+        rect_min_y = spring_fixed_point[1] - spring_inactive_band[1]
+        rect_max_y = spring_fixed_point[1] + spring_inactive_band[1]
+
+        spring_rectangle = {
+            "min_x": rect_min_x,
+            "max_x": rect_max_x,
+            "min_y": rect_min_y,
+            "max_y": rect_max_y,
+        }
+    else:
+        spring_rectangle = None
+
     # Create folder to save frames
     save_folder = f'{save_path}/{currtime}'
     os.makedirs(save_folder, exist_ok=True)
@@ -746,11 +1000,12 @@ def _save_links_trajectory_animation_frames(
         'steps_max'       : steps_max,
         'save_path'       : save_path,
         'currtime'        : currtime,
+        'spring_rectangle': spring_rectangle,
     }
 
 
-    # steps_start = round( 0.50 * len(steps) )
-    # steps_end   = round( 0.75 * len(steps) )
+    # steps_start = round( 0.40 * len(steps) )
+    # steps_end   = round( 1.00 * len(steps) )
 
     steps_start = 0
     steps_end   = len(steps)

@@ -481,6 +481,8 @@ class MechSimulation():
                 simulator          = self.simulator,
                 **self.options,
             )
+            success = True
+
         except PhysicsError as physics_error:
 
             # Directly raise the error if it is the main thread
@@ -489,9 +491,15 @@ class MechSimulation():
 
             # Otherwise, put the error in the queue
             self.snn_network.q_in.put(physics_error)
-            return False
+            success = False
 
-        return True
+        # Free rendering contexts (avoids OpenGL threading errors)
+        try:
+            self.sim.physics._free_rendering_contexts()
+        except AttributeError:
+            pass
+
+        return success
 
     def simulation_post_processing(
         self,

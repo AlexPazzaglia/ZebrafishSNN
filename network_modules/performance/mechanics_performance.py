@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from scipy.stats import linregress
+from scipy.ndimage import gaussian_filter1d
 from scipy.signal import find_peaks, hilbert, butter, filtfilt
 from network_modules.simulation.mechanical_simulation import MechSimulation
 from network_modules.vortices.body_loader import load_body_from_parameters
@@ -43,9 +44,18 @@ MECH_METRICS = [
     'mech_n2m_lag_ax_tal',
     'mech_n2m_lag_lb_all',
 
+    # External forces
+    'mech_force_total_x',
+    'mech_force_total_y',
+    'mech_force_total_z',
+
     # Torque and energy
-    'mech_torque',
-    'mech_energy',
+    'mech_torque_total',
+    'mech_torque_active',
+    'mech_energy_total',
+    'mech_energy_active',
+    'mech_power_active',
+    'mech_power_total',
     'mech_cot',
 
     # Trajectory
@@ -53,7 +63,9 @@ MECH_METRICS = [
     'mech_traj_curv',
 
     # Tail beat
+    'mech_tail_beat_std',
     'mech_tail_beat_amp',
+    'mech_tail_beat_amp_std',
 
     # Dimensionless numbers
     'mech_strouhal_number',
@@ -70,11 +82,11 @@ MECH_METRICS = [
     # Displacements
     'mech_joints_disp_mean',
     'mech_joints_disp_amp',
-    'mech_links_disp_mean',
-    'mech_links_disp_amp',
+    'mech_points_disp_mean',
+    'mech_points_disp_amp',
 
     # Displacements normalized
-    'mech_links_disp_amp_bl',
+    'mech_points_disp_amp_bl',
 ]
 
 MECH_METRICS_VECT_JOINTS = [
@@ -83,9 +95,9 @@ MECH_METRICS_VECT_JOINTS = [
 ]
 
 MECH_METRICS_VECT_LINKS = [
-    'mech_links_disp_mean',
-    'mech_links_disp_amp',
-    'mech_links_disp_amp_bl',
+    'mech_points_disp_mean',
+    'mech_points_disp_amp',
+    'mech_points_disp_amp_bl',
 ]
 
 class MechPerformance(MechSimulation):
@@ -121,101 +133,168 @@ class MechPerformance(MechSimulation):
             control_type = self.snn_network.control_type,
         )
 
+    def _add_joints_commands_arrays(
+        self,
+        data_arrays: dict[str, np.ndarray],
+    ):
+
+        if self.snn_network.control_type in [
+            'position_control',
+            'hybrid_position_control'
+        ]:
+            data_arrays['joints_commands']    = None
+            data_arrays['joints_tau_act_sum'] = None
+            data_arrays['joints_tau_act_dif'] = None
+            return data_arrays
+
+        mech_pars   = self.snn_network.params.mechanics
+        n_ax_joints = mech_pars.mech_axial_joints
+        n_lb_joints = mech_pars.mech_limbs_joints
+
+        n_comm = 2 * (n_ax_joints + n_lb_joints)
+        j_comm = np.array( self.sim_res_data.state.array )
+        j_comm = j_comm[:, :n_comm]
+        j_ang  = data_arrays['joints_positions']
+
+        # NOTE:
+        # tau_act         = alpha * (A1-A2) + beta * (A1 + A2) * th
+        # tau_act(th = 0) = alpha * (A1-A2)
+
+        act1 = j_comm[:, 1::2]
+        act2 = j_comm[:, 0::2]
+
+        muscles = self.animat_options['control']['muscles']
+        alphas  = np.array( [ m['alpha'] for m in muscles ] )
+        betas   = np.array( [ m['beta']  for m in muscles ] )
+
+        tau_act_dif = + (act1 - act2) * alphas
+        tau_act_sum = - (act1 + act2) * betas * j_ang
+
+        assert np.allclose(
+            tau_act_sum + tau_act_dif,
+            data_arrays['joints_active_torques'],
+            atol = 1e-12
+        ), 'Active torques do not match the commands'
+
+        data_arrays['joints_commands']    = j_comm
+        data_arrays['joints_tau_act_sum'] = tau_act_sum
+        data_arrays['joints_tau_act_dif'] = tau_act_dif
+
+        spring = data_arrays['joints_spring_torques']
+        damper = data_arrays['joints_damping_torques']
+        total  = data_arrays['joints_torques']
+
+        assert np.allclose(
+            spring + damper + tau_act_sum + tau_act_dif,
+            total,
+            atol = 1e-12
+        ), 'Total torques do not match the sum of spring, damper and active torques'
+
+        return data_arrays
+
     def load_mechanical_simulation_arrays(self):
         ''' Load mechanical simulation arrays '''
 
-        data       = self.sim_res_data
-        n_ax_links = self.snn_network.params.mechanics.mech_axial_joints + 1
+        data        = self.sim_res_data.sensors
+        mech_pars   = self.snn_network.params.mechanics
+        n_ax_joints = mech_pars.mech_axial_joints
+        n_lb_joints = mech_pars.mech_limbs_joints
+        n_ax_links  = n_ax_joints + 1
 
-        joints_positions      = np.array( data.sensors.joints.positions_all() )
-        joints_velocities     = np.array( data.sensors.joints.velocities_all() )
-        joints_active_torques = np.array( data.sensors.joints.active_torques() )
-        links_positions       = np.array( data.sensors.links.urdf_positions() )
-        links_velocities      = np.array( data.sensors.links.com_lin_velocities() )
+        data_arrays = {
+            'joints_positions'     : np.array( data.joints.positions_all() ),
+            'joints_velocities'    : np.array( data.joints.velocities_all() ),
 
-        joints_commands = (
-            None
-            if self.snn_network.control_type in ['position_control', 'hybrid_position_control']
-            else
-            np.array( data.state.array )
-        )
+            'joints_torques'        : np.array( data.joints.cmd_torques() ),
+            'joints_active_torques' : np.array( data.joints.active_torques() ),
+            'joints_spring_torques' : np.array( data.joints.spring_torques() ),
+            'joints_damping_torques': np.array( data.joints.damping_torques() ),
+
+            'joints_powers'        : np.array( data.joints.mechanical_power() ),
+            'joints_active_powers' : np.array( data.joints.mechanical_power_active() ),
+
+            'urdf_positions'       : np.array( data.links.urdf_positions() ),
+            'links_positions'      : np.array( data.links.com_positions() ),
+            'links_velocities'     : np.array( data.links.com_lin_velocities() ),
+            'links_ang_positions'  : np.array( data.links.com_orientations() ),
+            'links_ang_veloticies' : np.array( data.links.com_ang_velocities() ),
+            'links_forces'         : np.array( data.xfrc.forces() ),
+        }
+
+        # Add motor commands (if any)
+        data_arrays = self._add_joints_commands_arrays(data_arrays)
 
         # Take care of last iteration
-        if not np.any(joints_positions[-1]):
-            joints_positions  = joints_positions[:-1]
+        trim_last = lambda arr: arr[:-1] if np.any(arr[-1]) else arr
 
-        if not np.any(joints_velocities[-1]):
-            joints_velocities = joints_velocities[:-1]
+        for arr_name, arr in data_arrays.items():
+            if arr is None:
+                continue
+            data_arrays[arr_name] = trim_last(arr)
 
-        if not np.any(joints_active_torques[-1]):
-            joints_active_torques = joints_active_torques[:-1]
+        n_steps = min([ len(arr) for arr in data_arrays.values() if arr is not None ])
 
-        if not np.any(links_positions[-1]):
-            links_positions = links_positions[:-1]
-
-        if not np.any(links_velocities[-1]):
-            links_velocities = links_velocities[:-1]
-
-        if joints_commands is not None and not np.any(joints_commands[-1]):
-            joints_commands = joints_commands[:-1]
-
-        n_steps = min(
-            [
-                len(state_arr) for state_arr in [
-                    joints_positions,
-                    joints_velocities,
-                    joints_active_torques,
-                    links_positions,
-                    links_velocities,
-                    joints_commands,
-                ]
-                if state_arr is not None
-            ]
-        )
-
-        joints_positions      = joints_positions[:n_steps]
-        joints_velocities     = joints_velocities[:n_steps]
-        joints_active_torques = joints_active_torques[:n_steps]
-        links_positions       = links_positions[:n_steps]
-        links_velocities      = links_velocities[:n_steps]
-        joints_commands       = joints_commands[:n_steps] if joints_commands is not None else None
+        for arr_name, arr in data_arrays.items():
+            if arr is None:
+                continue
+            data_arrays[arr_name] = arr[:n_steps]
 
         #  Compute center of mass position
-        com_positions         = np.mean( links_positions[:, :n_ax_links], axis= 1)
+        links_positions = data_arrays['links_positions']
+        links_masses    = self.snn_network.params.mechanics.mech_links_masses
+        links_masses    = np.array(links_masses)
+        com_positions   = np.sum(
+            links_positions[:, :n_ax_links] *
+            links_masses[np.newaxis, :, np.newaxis],
+            axis= 1
+        ) / np.sum(links_masses)
 
-        # Extend links positions including the tail
+        data_arrays['com_positions'] = com_positions
+
+        # Extend points positions including the tail
+        urdf_positions   = data_arrays['urdf_positions']
         lenght_tail_link = self.snn_network.params.mechanics.mech_axial_links_length[-1]
 
-        tail_positions = MechProc._compute_tail_positions_from_links_positions(
-            links_positions  = links_positions,
-            joints_positions = joints_positions,
+        tail_positions = MechProc._compute_tail_positions_from_points_positions(
+            points_positions = urdf_positions,
+            joints_positions = data_arrays['joints_positions'],
             length_tail_link = lenght_tail_link,
             n_links_axis     = n_ax_links,
         )
-        links_positions = np.insert(
-            links_positions,
+        points_positions = np.insert(
+            urdf_positions,
             n_ax_links,
             tail_positions,
             axis = 1,
         )
+        data_arrays['points_positions'] = points_positions
 
-        self.joints_positions      = joints_positions
-        self.joints_velocities     = joints_velocities
-        self.joints_active_torques = joints_active_torques
-        self.links_positions       = links_positions
-        self.links_velocities      = links_velocities
-        self.com_positions         = com_positions
-        self.joints_commands       = joints_commands
+        # Extract arrays
+        self.joints_positions      = data_arrays['joints_positions']
+        self.joints_velocities     = data_arrays['joints_velocities']
 
-        return (
-            joints_positions,
-            joints_velocities,
-            joints_active_torques,
-            links_positions,
-            links_velocities,
-            com_positions,
-            joints_commands,
-        )
+        self.joints_torques        = data_arrays['joints_torques']
+        self.joints_active_torques = data_arrays['joints_active_torques']
+        self.joints_spring_torques = data_arrays['joints_spring_torques']
+        self.joints_damping_torques= data_arrays['joints_damping_torques']
+
+        self.joints_powers         = data_arrays['joints_powers']
+        self.joints_active_powers  = data_arrays['joints_active_powers']
+
+        self.urdf_positions        = data_arrays['urdf_positions']
+        self.points_positions      = data_arrays['points_positions']
+        self.links_positions       = data_arrays['links_positions']
+        self.links_velocities      = data_arrays['links_velocities']
+        self.links_ang_positions   = data_arrays['links_ang_positions']
+        self.links_ang_veloticies  = data_arrays['links_ang_veloticies']
+        self.links_forces          = data_arrays['links_forces']
+        self.com_positions         = data_arrays['com_positions']
+
+        self.joints_commands       = data_arrays['joints_commands']
+        self.joints_tau_act_sum    = data_arrays['joints_tau_act_sum']
+        self.joints_tau_act_dif    = data_arrays['joints_tau_act_dif']
+
+        return data_arrays
 
     ## METRICS COMPUTATION
     def farms_performance_metrics(
@@ -234,11 +313,14 @@ class MechPerformance(MechSimulation):
         duration          = timestep * n_steps
 
         # Transient time
-        transient_time    = min( 2.0, duration / 2.0 )
+        transient_time    = min( 5.0, duration / 2.0 )
 
         sim_fraction      = 1.0 - transient_time / duration
         n_steps_fraction  = round( n_steps * sim_fraction )
         duration_fraction = timestep * n_steps_fraction
+
+        logging.info(f'Mech_metrics sim fraction: {sim_fraction:.3f}')
+        logging.info(f'Mech_metrics sim duration: {duration_fraction:.3f}')
 
         # Mechanics parameters
         n_joints_limb = self.snn_network.params.mechanics.mech_n_lb_joints
@@ -253,41 +335,34 @@ class MechPerformance(MechSimulation):
         n_pca_links  = n_pca_joints + 1
 
         # Extract data
-        (
-            joints_positions,
-            joints_velocities,
-            joints_active_torques,
-            links_positions,
-            links_velocities,
-            com_positions,
-            joints_commands,
-        ) = self.load_mechanical_simulation_arrays()
+        mech_data_arrays = self.load_mechanical_simulation_arrays()
 
         # Get COM position vs joint phase
         self.get_com_position_vs_joint_phase_data(
-            points_positions = links_positions,
+            points_positions = self.points_positions,
         )
 
         # Compute metrics
         (
-            joints_displacements,
-            joints_displacements_mean,
-            _joints_displacements_std,
-            joints_displacements_amp,
+            joints_disp,
+            joints_disp_mean,
+            _joints_disp_std,
+            joints_disp_amp,
         ) = MechProc.compute_joints_displacements_metrics(
-            joints_positions = joints_positions,
+            joints_positions = self.joints_positions,
             n_joints_axis    = n_ax_joints,
             sim_fraction     = sim_fraction,
         )
 
         (
-            links_displacements,
-            links_displacements_mean,
-            _links_displacements_std,
-            links_displacements_amp,
-            links_displacements_data,
-        ) = MechProc.compute_links_displacements_metrics(
-            points_positions = links_positions,
+            points_disp,
+            points_disp_mean,
+            points_disp_std,
+            points_disp_amp,
+            points_disp_amp_std,
+            points_disp_data,
+        ) = MechProc.compute_points_displacements_metrics(
+            points_positions = self.points_positions,
             n_points_axis    = n_ax_points,
             sim_fraction     = sim_fraction,
             n_points_pca     = n_pca_links,
@@ -299,7 +374,7 @@ class MechPerformance(MechSimulation):
             freq_diff,
             freq_joints,
         ) = MechProc.compute_frequency(
-            joints_positions = joints_positions,
+            joints_positions = self.joints_positions,
             n_joints_axis    = n_ax_joints,
             n_joints_limbs   = n_lb_joints,
             timestep         = timestep,
@@ -309,7 +384,7 @@ class MechPerformance(MechSimulation):
         plot_joint_phase = False
         if plot_joint_phase:
             self.plot_phase_evolution(
-                joints_positions = joints_positions,
+                joints_positions = self.joints_positions,
                 joint_index      = 0,
             )
 
@@ -321,7 +396,7 @@ class MechPerformance(MechSimulation):
             ipl_lb_d,
             ipls_all,
         ) = MechProc.compute_joints_ipls(
-            joints_angles     = joints_positions,
+            joints_angles     = self.joints_positions,
             joints_freqs      = freq_joints,
             n_joints_axis     = n_ax_joints,
             n_joints_per_limb = n_joints_limb,
@@ -338,24 +413,6 @@ class MechPerformance(MechSimulation):
             ipl_ax_t = ipl_ax_t,
         )
 
-        # torque_commands = joints_commands[:, 1::2] - joints_commands[:, 0::2]
-        # (
-        #     ipl_command_ax_a,
-        #     ipl_command_ax_t,
-        #     ipl_command_lb_h,
-        #     ipl_command_lb_c,
-        #     ipl_command_lb_d,
-        #     ipls_command__all,
-        # ) = MechProc.compute_joints_ipls(
-        #     joints_angles     = torque_commands,
-        #     joints_freqs      = freq_joints,
-        #     n_joints_axis     = n_ax_joints,
-        #     n_joints_per_limb = n_joints_limb,
-        #     n_active_joints   = n_ax_joints + n_lb_joints,
-        #     limb_pairs_inds   = inds_lb_pairs,
-        #     timestep          = timestep,
-        # )
-
         (
             n2m_lag_ax_all,
             n2m_lag_ax_trk,
@@ -363,8 +420,8 @@ class MechPerformance(MechSimulation):
             n2m_lag_lb_all,
             n2m_lags_all,
         ) = MechProc.compute_joints_neuro_muscolar_ipls(
-            joints_commands = joints_commands,
-            joints_angles   = joints_positions,
+            joints_commands = self.joints_commands,
+            joints_angles   = self.joints_positions,
             joints_freqs    = freq_joints,
             n_joints_axis   = n_ax_joints,
             n_active_joints = n_ax_joints + n_lb_joints,
@@ -373,40 +430,61 @@ class MechPerformance(MechSimulation):
         )
 
         speed_fwd, speed_lat, speed_abs = MechProc.compute_speed(
-            links_positions_pca = links_displacements_data['links_positions_transformed'],
-            n_links_axis        = n_ax_points,
-            duration            = duration_fraction,
+            points_positions_pca = points_disp_data['points_positions_transformed'],
+            n_links_axis         = n_ax_points,
+            duration             = duration_fraction,
         )
 
         traj_mse = MechProc.compute_trajectory_linearity(
             timestep      = timestep,
-            com_positions = com_positions,
+            com_positions = self.com_positions,
             sim_fraction  = sim_fraction
         )
 
         traj_curv = MechProc.compute_trajectory_curvature(
             timestep     = timestep,
-            com_pos      = com_positions,
+            com_pos      = self.com_positions,
             sim_fraction = sim_fraction
         )
 
-        torque = MechProc.sum_torques(
-            joints_torques = joints_active_torques,
+        force_total = MechProc.sum_forces(
+            links_forces = self.links_forces,
+            sim_fraction = sim_fraction,
+        )
+
+        torque_total = MechProc.sum_torques(
+            joints_torques = self.joints_torques,
             sim_fraction   = sim_fraction
         )
 
-        energy = MechProc.sum_energy(
-            torques      = joints_active_torques,
-            speeds       = joints_velocities,
-            timestep     = timestep,
-            sim_fraction = sim_fraction,
+        torque_active = MechProc.sum_torques(
+            joints_torques = self.joints_active_torques,
+            sim_fraction   = sim_fraction
+        )
+
+        energy_total = MechProc.sum_powers(
+            joints_powers = self.joints_powers,
+            timestep      = timestep,
+            sim_fraction  = sim_fraction,
+            positive_only = True,
+        )
+
+        energy_active = MechProc.sum_powers(
+            joints_powers = self.joints_active_powers,
+            timestep      = timestep,
+            sim_fraction  = sim_fraction,
+            positive_only = True,
         )
 
         # Derived metrics
         lenght_ax         = self.snn_network.params.mechanics.mech_axial_length
-        tail_beat_amp     = links_displacements_amp[-1]
+        tail_beat_std     = points_disp_std[-1]
+        tail_beat_amp     = points_disp_amp[-1]
+        tail_beat_amp_std = points_disp_amp_std[-1]
         distance_fwd      = speed_fwd * duration_fraction
-        cost_of_transport = energy / np.abs(distance_fwd) if distance_fwd != 0 else np.nan
+        power_active      = energy_active / duration_fraction
+        power_total       = energy_total / duration_fraction
+        cost_of_transport = energy_total / np.abs( max(distance_fwd, np.finfo(float).eps))
         stride_length     = speed_fwd / freq_ax
 
         if self.snn_network.params.simulation.gait == 'swim':
@@ -430,7 +508,7 @@ class MechPerformance(MechSimulation):
         tail_beat_amp_bl = tail_beat_amp / lenght_ax
         stride_length_bl = stride_length / lenght_ax
 
-        links_displacements_amp_bl  = links_displacements_amp / lenght_ax
+        links_displacements_amp_bl  = points_disp_amp / lenght_ax
 
         # Return metrics
         mech_metrics = {
@@ -460,9 +538,18 @@ class MechPerformance(MechSimulation):
             'mech_n2m_lag_ax_tal'  : n2m_lag_ax_tal,
             'mech_n2m_lag_lb_all'  : n2m_lag_lb_all,
 
+            # External forces
+            'mech_force_total_x'   : force_total[0],
+            'mech_force_total_y'   : force_total[1],
+            'mech_force_total_z'   : force_total[2],
+
             # Torque and energy
-            'mech_torque'          : torque,
-            'mech_energy'          : energy,
+            'mech_torque_total'    : torque_total,
+            'mech_torque_active'   : torque_active,
+            'mech_energy_total'    : energy_total,
+            'mech_energy_active'   : energy_active,
+            'mech_power_active'    : power_active,
+            'mech_power_total'     : power_total,
             'mech_cot'             : cost_of_transport,
 
             # Trajectory
@@ -470,7 +557,9 @@ class MechPerformance(MechSimulation):
             'mech_traj_curv'       : traj_curv,
 
             # Tail beat
-            'mech_tail_beat_amp'   : tail_beat_amp,
+            'mech_tail_beat_std'    : tail_beat_std,
+            'mech_tail_beat_amp'    : tail_beat_amp,
+            'mech_tail_beat_amp_std': tail_beat_amp_std,
 
             # Dimensionless numbers
             'mech_strouhal_number' : strouhal_number,
@@ -485,13 +574,13 @@ class MechPerformance(MechSimulation):
             'mech_tail_beat_amp_bl': tail_beat_amp_bl,
 
             # Displacements
-            'mech_joints_disp_mean': joints_displacements_mean.tolist(),
-            'mech_joints_disp_amp' : joints_displacements_amp.tolist(),
-            'mech_links_disp_mean' : links_displacements_mean.tolist(),
-            'mech_links_disp_amp'  : links_displacements_amp.tolist(),
+            'mech_joints_disp_mean': joints_disp_mean.tolist(),
+            'mech_joints_disp_amp' : joints_disp_amp.tolist(),
+            'mech_points_disp_mean' : points_disp_mean.tolist(),
+            'mech_points_disp_amp'  : points_disp_amp.tolist(),
 
             # Displacements normalized
-            'mech_links_disp_amp_bl'  : links_displacements_amp_bl.tolist(),
+            'mech_points_disp_amp_bl'  : links_displacements_amp_bl.tolist(),
         }
 
         assert all( [key in MECH_METRICS for key in mech_metrics.keys()] ), 'Not all metrics are listed'
@@ -499,20 +588,13 @@ class MechPerformance(MechSimulation):
 
         logging.info(f'MECHANICS METRICS: {json.dumps(mech_metrics, indent=4)}')
 
-        self.all_metrics_data = {
-            'mech_metrics'            : mech_metrics,
-            'joints_commands'         : joints_commands,
-            'joints_positions'        : joints_positions,
-            'joints_velocities'       : joints_velocities,
-            'joints_active_torques'   : joints_active_torques,
-            'links_positions'         : links_positions,
-            'links_velocities'        : links_velocities,
-            'com_positions'           : com_positions,
-            'joints_displacements'    : joints_displacements,
-            'links_displacements'     : links_displacements,
-            'links_displacements_data': links_displacements_data,
-            'freq_joints'             : freq_joints,
-            'n2m_lags_all'            : n2m_lags_all,
+        self.all_metrics_data = mech_data_arrays |{
+            'mech_metrics'             : mech_metrics,
+            'joints_displacements'     : joints_disp,
+            'points_displacements'     : points_disp,
+            'points_displacements_data': points_disp_data,
+            'freq_joints'              : freq_joints,
+            'n2m_lags_all'             : n2m_lags_all,
         }
 
         if self.save_all_metrics_data:
@@ -847,9 +929,10 @@ class MechPerformance(MechSimulation):
         n_steps   = len(times)
         time_step = times[1] - times[0]
 
-        water_dynamics  = self.water_dynamics_options
-        water_path      = water_dynamics['results_path']
-        water_pars_path = f'{water_path}/parameters.yaml'
+        water_dynamics_dict = self.water_dynamics_options
+        water_callback      = water_dynamics_dict['callback_class']
+        water_path          = water_dynamics_dict['results_path']
+        water_pars_path     = f'{water_path}/parameters.yaml'
 
         fish_body    = load_body_from_parameters(water_pars_path)
         fish_props   = fish_body.zebrafish_properties
@@ -862,30 +945,31 @@ class MechPerformance(MechSimulation):
             signal_amp_fun   = fish_body.signal_amp_fun,
             signal_phase_fun = fish_body.signal_phase_fun,
             normalize        = False,
+            steady_loop      = water_callback.steady_loop
         )
 
         # Transformations
         leader_y_evolution *= -1
 
-        if water_dynamics['invert_x']:
+        if water_dynamics_dict['invert_x']:
             leader_x_evolution = -leader_x_evolution
-        if water_dynamics['invert_y']:
+        if water_dynamics_dict['invert_y']:
             leader_y_evolution = -leader_y_evolution
 
-        translation_x = water_dynamics['translation'][0]
-        translation_y = water_dynamics['translation'][1]
+        translation_x = water_dynamics_dict['translation'][0]
+        translation_y = water_dynamics_dict['translation'][1]
 
         leader_x_evolution += translation_x
         leader_y_evolution += translation_y
 
-        leader_dyn_pos_fun = water_dynamics['pos_offset_function']
+        leader_dyn_pos_fun = water_dynamics_dict['pos_offset_function']
         leader_dynamic_pos = np.array( [ leader_dyn_pos_fun(t) for t in times ] ) # leader_times
 
         leader_x_evolution = ( leader_x_evolution.T + leader_dynamic_pos[:, 0] ).T
         leader_y_evolution = ( leader_y_evolution.T + leader_dynamic_pos[:, 1] ).T
 
         # Delay
-        delay_start     = water_dynamics['delay_start']
+        delay_start     = water_dynamics_dict['delay_start']
         delay_steps     = round(delay_start / time_step)
         delay_buffer_x  = np.array([leader_x_evolution[0, :]] * delay_steps) * 1.0
         delay_buffer_y  = np.array([leader_y_evolution[0, :]] * delay_steps) * 0.0 + translation_y
@@ -914,6 +998,139 @@ class MechPerformance(MechSimulation):
         )
 
         return joint_positions_ref
+
+    def _linearize_phases(
+        self,
+        times  : np.ndarray,
+        phases : np.ndarray,
+        plot   : bool = False,
+    ):
+        ''' Linearize phases to cycles '''
+
+        # Find crossings 2pi
+        phases_wrapped   = phases % (2 * np.pi)
+        cycle_crossings  = np.where(np.diff(phases_wrapped) < -np.pi)[0].astype(int)
+
+        # Create linearized phases
+        phases_lin = np.copy(phases)
+
+        for i in range(len(cycle_crossings) - 1):
+
+            # Get start and end indices
+            idx0 = cycle_crossings[i]
+            idx1 = cycle_crossings[i + 1]
+
+            v0 = phases[idx0]
+            v1 = phases[idx1]
+
+            # Linear interpolation for each cycle
+            # phases_lin[idx0:idx1] = (
+            #     phases[idx0] +
+            #     np.linspace(0, 2 * np.pi, idx1 - idx0, endpoint=False)
+            # )
+
+            phases_lin[idx0:idx1 + 1] = (
+                v0 + (v1 - v0) * np.linspace(0, 1, idx1 - idx0 + 1)
+            )
+
+
+        if not plot:
+            return phases_lin
+
+        # Plot
+        phases_lin_wrapped = phases_lin % (2 * np.pi)
+
+        plt.figure()
+        plt.plot(times, phases_wrapped, label='phases')
+        plt.plot(times, phases_lin_wrapped, label='phases_lin')
+        plt.plot(
+            times[cycle_crossings],
+            phases_wrapped[cycle_crossings],
+            'o',
+            color = 'red',
+            label = 'crossings'
+        )
+        plt.xlabel('Time (s)')
+        plt.ylabel('Phase (rad)')
+        plt.title('Phase Unwrapping Check')
+        plt.legend()
+
+        return phases_lin
+
+    def _get_firing_rates(
+        self,
+        times : np.ndarray,
+    ):
+        ''' Get PS rate evolution '''
+
+        t_tag = 'times_raw'
+        c_tag = 'spike_count_raw'
+        net_modules = self.snn_network.params.topology.network_modules
+
+        target_modules = {
+            'mn' : net_modules['mn']['axial']['mn'],
+            'ps' : net_modules['ps']['axial']['ps'],
+            'ex' : net_modules['cpg']['axial']['ex'],
+            'in' : net_modules['cpg']['axial']['in'],
+        }
+        firing_rates = {}
+
+        for mod_name, mod in target_modules.items():
+
+            # Get spike count
+            c_times = self.snn_network.smooth_activations[mod_name][t_tag]
+            c_vals  = self.snn_network.smooth_activations[mod_name][c_tag]
+
+            # Convert to firing rate
+            timestep   = float( c_times[1] - c_times[0] )
+            rates_raw  = c_vals / timestep / mod.n_pool_side
+
+            # Smooth over time window
+            sigma_t  = 0.010
+            sigma_n  = sigma_t / timestep
+            rates    = gaussian_filter1d(rates_raw, sigma=sigma_n)
+            c_vals_f = gaussian_filter1d(c_vals, sigma=sigma_n)
+
+            # Left and right rates
+            rate_raw_l = np.mean(rates_raw[0::2], axis=0)
+            rate_raw_r = np.mean(rates_raw[1::2], axis=0)
+            rate_l     = np.mean(rates[0::2], axis=0)
+            rate_r     = np.mean(rates[1::2], axis=0)
+
+            # Compute left-right difference
+            rate_diff = rate_l - rate_r
+            rate_diff = np.interp(times, c_times, rate_diff)
+
+            # Store results
+            firing_rates[mod_name] = {
+                'times'     : c_times,
+                'counts'    : c_vals,
+                'counts_f'  : c_vals_f,
+                'rates_raw' : rates_raw,
+                'rates'     : rates,
+                'rate_l'    : rate_l,
+                'rate_r'    : rate_r,
+                'rate_raw_l': rate_raw_l,
+                'rate_raw_r': rate_raw_r,
+                'rate_diff' : rate_diff,
+            }
+
+        # DEBUG PLOT
+        # mod      = 'mn'
+        # key      = 'counts'
+        # c_vals   = firing_rates[mod][key]
+        # c_vals_l = np.sum( c_vals[0::2], axis=0)
+        # c_vals_r = np.sum( c_vals[1::2], axis=0)
+
+        # c_vals_l_f = gaussian_filter1d(c_vals_l, sigma=sigma_n)
+        # c_vals_r_f = gaussian_filter1d(c_vals_r, sigma=sigma_n)
+
+        # plt.plot(c_vals_l)
+        # plt.plot(c_vals_r)
+        # plt.plot(c_vals_l_f, color='0.5', linewidth=1.0)
+        # plt.plot(c_vals_r_f, color='0.5', linewidth=1.0)
+
+        return firing_rates
 
     def get_com_position_vs_joint_phase_data(
         self,
@@ -956,7 +1173,6 @@ class MechPerformance(MechSimulation):
         n_iterations = self.sim_res_data.sensors.joints.size(0)
 
         n_delay      = round(start_delay / timestep)
-        n_signal     = n_iterations - n_delay
         times        = np.arange(0, timestep*n_iterations, timestep)
 
         ########################################################
@@ -1016,6 +1232,13 @@ class MechPerformance(MechSimulation):
         joint_phases_ref = np.unwrap(np.angle(hilb_joint_positions_ref))
         joint_phases     = np.unwrap(np.angle(hilb_joint_positions))
 
+        # Linearize phases
+        linearize = True
+
+        if linearize:
+            joint_phases_ref = self._linearize_phases(times, joint_phases_ref)
+            joint_phases     = self._linearize_phases(times, joint_phases)
+
         # Adjust for delay
         joint_phases_ref[:n_delay] = 0
 
@@ -1049,13 +1272,14 @@ class MechPerformance(MechSimulation):
         joint_phases_diff[joint_phases_diff > np.pi] -= 2*np.pi
 
         # Integral of the phase difference
-        phi1                = joint_phases[n_delay:]
-        phi0                = joint_phases_ref[n_delay:]
-        n_cycles            = (phi1[-1] - phi1[0]) / (2*np.pi)
-        n_cycles_ref        = (phi0[-1] - phi0[0]) / (2*np.pi)
-        freq_lockking_ratio = n_cycles / n_cycles_ref
+        if n_delay < n_iterations:
+            phi1            = joint_phases[n_delay:]
+            phi0            = joint_phases_ref[n_delay:]
+            n_cycles        = (phi1[-1] - phi1[0]) / (2*np.pi)
+            n_cycles_ref    = (phi0[-1] - phi0[0]) / (2*np.pi)
+            freq_lock_ratio = n_cycles / n_cycles_ref
 
-        logging.info(f"Frequency locking ratio: {freq_lockking_ratio * 100:.2f}%")
+            logging.info(f"Frequency lock ratio: {freq_lock_ratio * 100:.2f}%")
 
         # Plot data
         # phases_norm                               = np.mod(joint_phases, 2*np.pi)
@@ -1071,28 +1295,437 @@ class MechPerformance(MechSimulation):
         # plt.plot(joint_positions_ref,   label='ref', c='r')
         # plt.legend()
 
+        # Fluid-body coherence
+        (
+            coherence_pos_vel,
+            coherence_vel_vel,
+            coherence_acc_vel,
+            coherence_ang_vor,
+        ) = self.compute_fluid_body_coherence()
+
+        # Propulsion forces
+        propulsion_forces = self.compute_propulsion_forces()
+
+        # Firing rate
+        firing_rates   = self._get_firing_rates(times)
+
+        # firing_rate_ex = firing_rates['ex']['rates']
+        # firing_rate_in = firing_rates['in']['rates']
+        # firing_rate_mn = firing_rates['mn']['rates']
+        # firing_rate_ps = firing_rates['ps']['rates']
+
+        # mod = 'ps'
+        # seg = 10
+        # plt.plot( firing_rates[mod]['rates'][2 * seg + 0] )
+        # plt.plot( firing_rates[mod]['rates'][2 * seg + 1] )
+
+        # mod = 'mn'
+        # plt.plot( np.sum( firing_rates[mod]['rates'][0::2], axis=0 ) )
+        # plt.plot( np.sum( firing_rates[mod]['rates'][1::2], axis=0 ) )
+
         ########################################################
         # All Data #############################################
         ########################################################
 
+        def _counts_to_dict(tag, rates):
+            return {
+                f'{tag}_spike_count_{ind}' : rate
+                for ind, rate in enumerate(rates)
+            }
+
+        def _joints_to_dict(tag, joints_array):
+            n_steps, n_joints = joints_array.shape
+            if n_steps == times.shape[0] - 1:
+                joints_array = np.vstack([np.zeros(n_joints), joints_array])
+            return {
+                f'joint_{ind}_{tag}' : joints_array[:, ind]
+                for ind in range(joints_array.shape[1])
+            }
+
         self.data_com_pos_vs_joint_phase = pd.DataFrame(
             {
                 'times'              : times,
+
                 'joint_positions'    : joint_positions,
                 'joint_positions_ref': joint_positions_ref,
                 'joint_phases'       : joint_phases,
                 'joint_phases_ref'   : joint_phases_ref,
+
                 'com_positions'      : com_positions,
                 'com_positions_ref'  : com_positions_ref,
                 'com_positions_diff' : com_positions_diff,
+
                 'joint_phases_diff'  : joint_phases_diff,
-            }
+
+                'coherence_pos_vel'  : np.mean(coherence_pos_vel, axis=1),
+                'coherence_vel_vel'  : np.mean(coherence_vel_vel, axis=1),
+                'coherence_acc_vel'  : np.mean(coherence_acc_vel, axis=1),
+                'coherence_ang_vor'  : coherence_ang_vor,
+
+                'propulsion_fx'      : propulsion_forces[:, 0],
+                'propulsion_fy'      : propulsion_forces[:, 1],
+            } |
+
+            # Add spike counts
+            _counts_to_dict('ex', firing_rates['ex']['counts']) |
+            _counts_to_dict('in', firing_rates['in']['counts']) |
+            _counts_to_dict('mn', firing_rates['mn']['counts']) |
+            _counts_to_dict('ps', firing_rates['ps']['counts']) |
+
+            # Add joints quantities
+            _joints_to_dict('pos', self.joints_positions) |
+            _joints_to_dict('vel', self.joints_velocities) |
+            _joints_to_dict('trq_spring', self.joints_spring_torques) |
+            _joints_to_dict('trq_damping', self.joints_damping_torques) |
+            _joints_to_dict('trq_tot', self.joints_torques) |
+            _joints_to_dict('trq_act_sum', self.joints_tau_act_sum) |
+            _joints_to_dict('trq_act_dif', self.joints_tau_act_dif)
+
         )
 
         if save_data:
             current_time = time.strftime('%Y-%m-%d_%H-%M-%S')
             file_name    = f'com_vs_angle_data_{current_time}.csv'
+            file_path    = f'{self.results_data_folder}/{file_name}'
 
-            self.data_com_pos_vs_joint_phase.to_csv(f'{self.results_data_folder}/{file_name}')
+            print(f'Saving COM position vs joint phase data to {file_path}')
+
+            self.data_com_pos_vs_joint_phase.to_csv(file_path, index=False)
+
+        # # Filtering coherence signal
+        # nyquist       = 0.5 / timestep
+        # normal_cutoff = 1.0 / nyquist
+        # b, a = butter(2, normal_cutoff, btype='low')
+
+        # coherence_vv = np.mean(coherence_vel_vel, axis=1)
+        # coherence_vv = filtfilt(b, a, coherence_vv)
+
+        # # Joints segmentation
+        # frequency    = 3.36
+        # steps_period = round(1 / (frequency * timestep))
+
+        # n_steps = 10_000
+        # step_on = 15_000
+
+        # joints_off   = self.joints_positions[ step_on - 10_000 : step_on ]
+        # joints_trans = self.joints_positions[ step_on : step_on + 2_000 ]
+        # joints_on    = self.joints_positions[ step_on : step_on + n_steps ]
+
+
+        # def segment_by_extrema(signal, steps_half_period):
+        #     """
+        #     Segment a 1D oscillatory signal based on both minima and maxima.
+        #     Returns indices of extrema and corresponding segment boundaries.
+        #     """
+        #     # Find maxima
+        #     maxima_idx, _ = find_peaks(signal, distance=steps_half_period)
+        #     # Find minima
+        #     minima_idx, _ = find_peaks(-signal, distance=steps_half_period)
+
+        #     # Start with a minimum
+        #     maxima_idx = maxima_idx[maxima_idx > min(minima_idx)]
+
+        #     # Combine and sort
+        #     extrema_idx = np.sort(np.concatenate([maxima_idx, minima_idx]))
+
+        #     # Remove too-close extrema (e.g. flat noise)
+        #     extrema_idx = np.unique(extrema_idx)
+
+
+        #     # Build segments between consecutive extrema (half-periods)
+        #     segments = [(extrema_idx[i], extrema_idx[i+1]) for i in range(len(extrema_idx)-1)]
+
+        #     return extrema_idx, segments
+
+        # def segment_all_joints(joints, steps_period):
+        #     """
+        #     Apply segmentation to each joint independently.
+        #     Returns:
+        #         extrema_all: list of extrema indices per joint
+        #         segments_all: list of (start, end) index tuples per joint
+        #     """
+        #     steps_half_period = int(steps_period // 2)
+        #     extrema_all, segments_all = [], []
+
+        #     for j in range(joints.shape[1]):
+        #         signal = joints[:, j]
+        #         extrema_idx, segs = segment_by_extrema(signal, steps_half_period)
+        #         extrema_all.append(extrema_idx)
+        #         segments_all.append(segs)
+
+        #     return extrema_all, segments_all
+
+        # def plot_superimposed_periods(signal, segments, title, color="tab:blue", normalize_length=False):
+        #     """
+        #     Plot all detected periods (segments) superimposed, aligned at time 0.
+
+        #     Parameters
+        #     ----------
+        #     signal : np.ndarray
+        #         1D array of joint position values.
+        #     segments : list of (start_idx, end_idx)
+        #         List of segment boundaries. Each (start, end) defines one half- or full-period.
+        #     title : str
+        #         Title for the plot.
+        #     color : str
+        #         Line color for all periods.
+        #     normalize_length : bool
+        #         If True, resample each segment to the same length (for clean overlay).
+        #     """
+
+        #     for (start, end) in segments:
+        #         segment = signal[start:end]
+
+        #         if len(segment) < 3:
+        #             continue  # skip too short segments
+
+        #         # normalize length if desired
+        #         if normalize_length:
+        #             segment = np.interp(
+        #                 np.linspace(0, 1, 200),  # common normalized time axis
+        #                 np.linspace(0, 1, len(segment)),
+        #                 segment
+        #             )
+        #             t = np.linspace(0, 1, len(segment))
+        #         else:
+        #             t = np.arange(len(segment))
+
+        #         plt.plot(t, segment, color=color, alpha=0.3)
+
+        #     plt.title(title)
+        #     plt.xlabel("Normalized time (period start → end)")
+        #     plt.ylabel("Joint position")
+        #     plt.tight_layout()
+
+        #     return
+
+        # extrema_on , segments_on  = segment_all_joints(joints_on, steps_period)
+        # extrema_off, segments_off = segment_all_joints(joints_off, steps_period)
+
+        # # Get extrema and segments for one joint
+
+        # joint_id = 0
+
+        # signal_off = joints_off[:, joint_id]
+        # signal_on  = joints_on[:, joint_id]
+
+        # segments_off_joint = segments_off[joint_id]
+        # segments_on_joint  = segments_on[joint_id]
+
+        # # (Optional) Convert from half-periods to full periods (min→min or max→max)
+        # # This makes the overlaid waveforms cleaner and symmetric
+        # full_segments_off = [(segments_off_joint[2*i][0], segments_off_joint[2*i+1][1])
+        #                     for i in range(len(segments_off_joint)//2)]
+        # full_segments_on  = [(segments_on_joint[2*i][0], segments_on_joint[2*i+1][1])
+        #                     for i in range(len(segments_on_joint)//2)]
+
+        # # Plot superimposed periods
+        # plt.figure(figsize=(8, 4))
+        # plot_superimposed_periods(signal_off, full_segments_off, f"Joint {joint_id}", color="tab:red")
+        # plot_superimposed_periods(signal_on,  full_segments_on,  f"Joint {joint_id}", color="tab:green")
+
 
         return
+
+    def compute_fluid_body_coherence(self):
+        ''' Compute the coherence between the fluid and the body '''
+
+        # Parameters
+        start_delay = self.water_dynamics_options['delay_start']
+        timestep    = self.sim_res_data.timestep
+        n_delay     = round(start_delay / timestep)
+        n_iterations = self.sim_res_data.sensors.joints.size(0)
+
+        if n_delay == n_iterations:
+            n_delay = 0
+
+        # Get data
+        dx = dy = 0.0001
+        velocity_cb      = self.water_dynamics_options['velocity_callback']
+        links_velocities = self.links_velocities
+        links_positions  = self.links_positions
+
+        fluid_velocities  = np.zeros_like(links_velocities)
+        fluid_vorticities = np.zeros(links_velocities.shape[:2])
+
+        for t_ind in range(links_velocities.shape[0]):
+            t = t_ind * self.sim_res_data.timestep
+
+            for p_ind in range(links_velocities.shape[1]):
+
+                x, y, z = links_positions[t_ind, p_ind]
+
+                # Base velocity at link position
+                fluid_velocities[t_ind, p_ind] = velocity_cb(t, x, y, z)
+
+                # Base velocities at offset positions
+                v_dx_pos = velocity_cb(t, x + dx, y, z)
+                v_dx_neg = velocity_cb(t, x - dx, y, z)
+                v_dy_pos = velocity_cb(t, x, y + dy, z)
+                v_dy_neg = velocity_cb(t, x, y - dy, z)
+
+                # Central difference derivatives
+                dvy_dx = (v_dx_pos[1] - v_dx_neg[1]) / (2 * dx)
+                dvx_dy = (v_dy_pos[0] - v_dy_neg[0]) / (2 * dy)
+
+                # 2D vorticity component (z-component of curl)
+                fluid_vorticities[t_ind, p_ind] = dvy_dx - dvx_dy
+
+
+        # Remove speed offset
+        fluid_vel_off     = velocity_cb(0, np.inf, np.inf, np.inf)
+        fluid_velocities -= fluid_vel_off
+
+        # Extract xy components (n_steps, n_links, 2)
+        links_pos = links_positions[:, :, :2]
+        links_vel = links_velocities[:, :, :2]
+        fluid_vel = fluid_velocities[:, :, :2]
+
+        links_ang = self.links_ang_veloticies[:, :, 2]
+        fluid_vor = fluid_vorticities[:, :]
+
+        links_acc     = np.zeros_like(links_vel)
+        links_acc[1:] = np.diff(links_vel, axis=0) / timestep
+
+        assert links_vel.shape == fluid_vel.shape, 'Arrays must have the same shape'
+        assert links_acc.shape == fluid_vel.shape, 'Arrays must have the same shape'
+        assert links_ang.shape == fluid_vor.shape, 'Arrays must have the same shape'
+
+        # Pad array with zeros to match n_iterations
+        links_pos = self._pad_array(links_pos, n_iterations)
+        links_vel = self._pad_array(links_vel, n_iterations)
+        links_acc = self._pad_array(links_acc, n_iterations)
+        fluid_vel = self._pad_array(fluid_vel, n_iterations)
+
+        links_ang = self._pad_array(links_ang, n_iterations)
+        fluid_vor = self._pad_array(fluid_vor, n_iterations)
+
+        # Average coherence
+        mean_pos_vel, coherence_pos_vel = self._compute_coherence(
+            arr1    = links_pos,
+            arr2    = fluid_vel,
+            n_delay = n_delay,
+        )
+        mean_vel_vel, coherence_vel_vel = self._compute_coherence(
+            arr1    = links_vel,
+            arr2    = fluid_vel,
+            n_delay = n_delay,
+        )
+        mean_acc_vel, coherence_acc_vel = self._compute_coherence(
+            arr1    = links_acc,
+            arr2    = fluid_vel,
+            n_delay = n_delay,
+        )
+        mean_ang_vor, coherence_ang_vor = self._compute_coherence(
+            arr1    = links_ang,
+            arr2    = fluid_vor,
+            n_delay = n_delay,
+        )
+
+        logging.info(f'Coherence links pos - fluid vel: {mean_pos_vel:.4e}')
+        logging.info(f'Coherence links vel - fluid vel: {mean_vel_vel:.4e}')
+        logging.info(f'Coherence links acc - fluid vel: {mean_acc_vel:.4e}')
+        logging.info(f'Coherence links ang - fluid vor: {mean_ang_vor:.4e}')
+
+        # # Filtering coherence signal
+        # nyquist       = 0.5 / timestep
+        # normal_cutoff = 1.0 / nyquist
+        # b, a = butter(2, normal_cutoff, btype='low')
+
+        # c_signal   = coherence_vel_vel
+        # # c_signal   = coherence_ang_vor
+
+        # if len(c_signal.shape) == 2:
+        #     c_signal = np.mean(c_signal, axis=1)
+        # c_signal_f = filtfilt(b, a, c_signal)
+
+        # plt.figure()
+        # plt.plot(c_signal)
+        # plt.plot(c_signal_f)
+        # plt.xlabel('Time')
+        # plt.ylabel('Coherence')
+        # plt.title('Coherence')
+        # plt.show()
+
+        return (
+            coherence_pos_vel, coherence_vel_vel,
+            coherence_acc_vel, coherence_ang_vor,
+        )
+
+    def _compute_coherence(self, arr1, arr2, n_delay=0):
+        ''' Compute the coherence between two arrays '''
+
+        # Compute dot product (F · v) for each link and timestep
+        dot_products = np.sum(arr1 * arr2, axis=-1)  # (n_steps, n_signals)
+
+        # Compute magnitudes of F and v
+        norm1 = np.linalg.norm(arr1, axis=-1)  # (n_steps, n_signals))
+        norm2 = np.linalg.norm(arr2, axis=-1)  # (n_steps, n_signals))
+
+        # Avoid division by zero
+        coherence       = np.zeros_like(dot_products)
+        mask            = (norm1 > 0) & (norm2 > 0)
+        mask_norm       = norm1[mask] * norm2[mask]
+        coherence[mask] = dot_products[mask] / mask_norm
+
+        # Average coherence
+        mean_coherence = np.mean(coherence[n_delay:])
+
+        # v1 = np.copy(arr1)
+        # v1[:, :, 0] /= norm1
+        # v1[:, :, 1] /= norm1
+        # v2 = np.copy(arr2)
+        # v2[:, :, 1] /= norm2
+        # v2[:, :, 0] /= norm2
+
+        # step  = 20_000
+        # point = 10
+
+        # for step in np.arange(0, v1.shape[0], 1000):
+        #     plt.plot(
+        #         [0, v1[step, point, 0]],
+        #         [0, v1[step, point, 1]],
+        #         'b',
+        #     )
+        #     plt.plot(
+        #         [0, v2[step, point, 0]],
+        #         [0, v2[step, point, 1]],
+        #         'r',
+        #     )
+        # plt.axis('equal')
+
+        return mean_coherence, coherence
+
+    def _pad_array(self, arr, n_iterations):
+        ''' Pad array to match n_iterations '''
+        n_pads = n_iterations - arr.shape[0]
+        if n_pads > 0:
+            pad = [ arr[0] ] * n_pads
+            arr = np.vstack([pad, arr])
+        elif n_pads < 0:
+            raise ValueError('Len(arr) > n_iterations, cannot pad array')
+        return arr
+
+    def compute_propulsion_forces(self):
+        ''' Compute the coherence between the fluid and the body '''
+
+        # Parameters
+        start_delay  = self.water_dynamics_options['delay_start']
+        timestep     = self.sim_res_data.timestep
+        n_delay      = round(start_delay / timestep)
+        n_iterations = self.sim_res_data.sensors.joints.size(0)
+
+        if n_delay == n_iterations:
+            n_delay = 0
+
+        # Get data
+        links_forces = self.links_forces
+        total_forces = np.sum(links_forces, axis=1)
+        total_forces = self._pad_array(total_forces, n_iterations)
+
+        # Average forces
+        mean_force = np.mean(total_forces[n_delay:], axis=0)
+        logging.info(f'Mean propulsion Fx: {mean_force[0]:.4e}')
+        logging.info(f'Mean propulsion Fy: {mean_force[1]:.4e}')
+
+        return total_forces

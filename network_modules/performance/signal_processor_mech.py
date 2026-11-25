@@ -78,6 +78,26 @@ def _compute_signals_amplitudes_peaks(
 
     return amplitudes
 
+def _compute_signals_amplitudes_std_peaks(
+    signal_2D : np.ndarray,
+) -> np.ndarray:
+    ''' Calculate the amplitude using the peaks of the signal '''
+
+    num_signals = signal_2D.shape[1]
+    amp_stds    = np.zeros(num_signals)
+
+    for i in range(num_signals):
+        signal_osc   = signal_2D[:, i] - np.mean(signal_2D[:, i])
+        signal_abs   = np.abs(signal_osc)
+        signal_peaks = find_peaks(signal_abs)[0]
+
+        if len(signal_peaks) == 0:
+            continue
+
+        amp_stds[i] = np.std(signal_abs[signal_peaks])
+
+    return amp_stds
+
 def _compute_signals_delays(
     times       : np.ndarray,
     signals     : np.ndarray,
@@ -315,26 +335,26 @@ def _compute_links_displacements(
     )
 
     # Find the minimum distance to the fitted parabola
-    links_displacements = np.array(
+    points_displacements = np.array(
         [
             _get_distance_to_quadratic(point, quadratic_fit_coefficients)
             for point in flattened_coordinates
         ]
     )
 
-    links_displacements = links_displacements.reshape(coordinates_xy.shape[0], -1)
+    points_displacements = points_displacements.reshape(coordinates_xy.shape[0], -1)
 
     return {
-        'links_displacements'        : links_displacements,
-        'links_positions'            : coordinates_xy,
-        'links_positions_transformed': coordinates_xy_transformed,
-        'direction_fwd'              : direction_fwd,
-        'direction_left'             : direction_left,
-        'quadratic_fit_coefficients' : quadratic_fit_coefficients,
+        'points_displacements'        : points_displacements,
+        'points_positions'            : coordinates_xy,
+        'points_positions_transformed': coordinates_xy_transformed,
+        'direction_fwd'               : direction_fwd,
+        'direction_left'              : direction_left,
+        'quadratic_fit_coefficients'  : quadratic_fit_coefficients,
     }
 
-def _compute_tail_positions_from_links_positions(
-    links_positions : np.ndarray,
+def _compute_tail_positions_from_points_positions(
+    points_positions : np.ndarray,
     joints_positions: np.ndarray,
     length_tail_link: float,
     n_links_axis    : int,
@@ -342,7 +362,7 @@ def _compute_tail_positions_from_links_positions(
     ''' Compute the tail positions '''
 
     # Compute the direction of the second last link
-    v_last     = links_positions[:, n_links_axis-1, :] - links_positions[:, n_links_axis-2, :]
+    v_last     = points_positions[:, n_links_axis-1, :] - points_positions[:, n_links_axis-2, :]
     v_last     = v_last / np.linalg.norm(v_last, axis=1).reshape(-1, 1)
     angle_last = joints_positions[:, n_links_axis-2]
 
@@ -356,9 +376,36 @@ def _compute_tail_positions_from_links_positions(
     ).T
 
     # Compute the tail positions
-    tail_positions = links_positions[:, n_links_axis-1] + length_tail_link * v_tail
+    tail_positions = points_positions[:, n_links_axis-1] + length_tail_link * v_tail
 
     return tail_positions
+
+def _compute_signals_coherence(
+    arr1 : np.ndarray[float],
+    arr2 : np.ndarray[float],
+):
+    '''
+    Compute the coherence between two arrays
+    NOTE: Shape of arr1 and arr2 must be (n_steps, n_signals)
+    '''
+
+    # Compute dot product (F · v) for each link and timestep
+    dot_products = np.sum(arr1 * arr2, axis=-1)  # (n_steps, n_signals)
+
+    # Compute magnitudes of F and v
+    norm1 = np.linalg.norm(arr1, axis=-1)  # (n_steps, n_signals))
+    norm2 = np.linalg.norm(arr2, axis=-1)  # (n_steps, n_signals))
+
+    # Avoid division by zero
+    coherence       = np.zeros_like(dot_products)
+    mask            = (norm1 > 0) & (norm2 > 0)
+    mask_norm       = norm1[mask] * norm2[mask]
+    coherence[mask] = dot_products[mask] / mask_norm
+
+    # Average coherence
+    mean_coherence = np.mean(coherence)
+
+    return mean_coherence, coherence
 
 ### -------- [ UTILS ] --------
 
@@ -388,7 +435,7 @@ def compute_joints_displacements_metrics(
         joints_displacements_amp,
     )
 
-def compute_links_displacements_metrics(
+def compute_points_displacements_metrics(
     points_positions: np.ndarray,
     n_points_axis   : int,
     sim_fraction    : float = 1.0,
@@ -406,14 +453,14 @@ def compute_links_displacements_metrics(
     # Compute links displacements
     points_positions = points_positions[-n_steps_considered::n_steps_skip, :n_points_axis, :2]
 
-    links_displacements_data = _compute_links_displacements(
+    points_displ_data = _compute_links_displacements(
         coordinates_xy = points_positions,
         n_links_pca    = n_points_pca,
     )
-    links_displacements = links_displacements_data['links_displacements']
+    points_displ = points_displ_data['points_displacements']
 
     # # Compute CoM and PCA
-    # links_displacements = np.zeros((n_steps_considered, n_links_axis))
+    # points_displacements = np.zeros((n_steps_considered, n_links_axis))
     # vect_com            = np.mean(links_positions[:, :n_links_pca], axis= 1)
     # vect_fwd_unitary    = np.zeros((n_steps_considered, 2))
     # vect_lat_unitary    = np.zeros((n_steps_considered, 2))
@@ -429,19 +476,56 @@ def compute_links_displacements_metrics(
 
     #     # Projection along the lateral direction
     #     vect_com2link            = links_positions[ind] - vect_com[ind]
-    #     links_displacements[ind] = np.sum( vect_com2link * vect_lat_unitary[ind], axis= 1 )
+    #     points_displacements[ind] = np.sum( vect_com2link * vect_lat_unitary[ind], axis= 1 )
+
+    # Study tail amplitude peaks
+    # body_length  = 0.018
+    # sig          = points_displ[:, -1] / body_length
+    # n_sig        = sig.shape[0]
+    # pos_peaks, _ = find_peaks(+sig)
+    # neg_peaks, _ = find_peaks(-sig)
+    # peak_inds    = np.sort( np.concatenate( [pos_peaks, neg_peaks]) )
+    # peak_vals    = np.abs(sig[peak_inds])
+
+    # peak_vals_pre  = peak_vals[ peak_inds <  n_sig // 2 ]
+    # peak_vals_post = peak_vals[ peak_inds >= n_sig // 2 ]
+
+    # peak_std_pre  = np.std(peak_vals_pre)
+    # peak_std_post = np.std(peak_vals_post)
+
+    # print(f'Peak std pre: {peak_std_pre:.4f}')
+    # print(f'Peak std post: {peak_std_post:.4f}')
+
+    # plt.scatter(
+    #     np.arange(len(peak_vals_pre)),
+    #     np.sort(peak_vals_pre),
+    #     color = 'blue',
+    #     label = 'Pre',
+    # )
+    # plt.scatter(
+    #     np.arange(len(peak_vals_post)),
+    #     np.sort(peak_vals_post),
+    #     color = 'red',
+    #     label = 'Post',
+    # )
+    # plt.xlabel('Peak index')
+    # plt.ylabel('Tail displacement peak amplitude')
+    # plt.legend()
+    # plt.show()
 
     # Compute metrics
-    links_displacements_mean = np.mean(links_displacements, axis= 0)
-    links_displacements_std  = np.std(links_displacements, axis= 0)
-    links_displacements_amp  = _compute_signals_amplitudes_peaks(links_displacements)
+    points_displ_mean    = np.mean(points_displ, axis= 0)
+    points_displ_std     = np.std(points_displ, axis= 0)
+    points_displ_amp     = _compute_signals_amplitudes_peaks(points_displ)
+    points_displ_amp_std = _compute_signals_amplitudes_std_peaks(points_displ)
 
     return (
-        links_displacements,
-        links_displacements_mean,
-        links_displacements_std,
-        links_displacements_amp,
-        links_displacements_data,
+        points_displ,
+        points_displ_mean,
+        points_displ_std,
+        points_displ_amp,
+        points_displ_amp_std,
+        points_displ_data,
     )
 
 def compute_trajectory_linearity(
@@ -774,7 +858,7 @@ def compute_speed_pca(
     return speed_fwd, speed_lat, speed_abs
 
 def compute_speed(
-    links_positions_pca: np.ndarray,
+    points_positions_pca: np.ndarray,
     n_links_axis       : int,
     duration           : float,
     sim_fraction       : float = 1.0,
@@ -783,12 +867,12 @@ def compute_speed(
     Computes the axial and lateral speed based on the PCA of the links positions
     '''
 
-    n_steps             = links_positions_pca.shape[0]
+    n_steps             = points_positions_pca.shape[0]
     n_steps_considered  = round(n_steps * sim_fraction)
     duration_considered = duration * sim_fraction
 
     links_positions_pca_com = np.mean(
-        links_positions_pca[-n_steps_considered:, :n_links_axis],
+        points_positions_pca[-n_steps_considered:, :n_links_axis],
         axis= 1
     )
 
@@ -828,6 +912,19 @@ def travel_distance(links_data, sim_fraction=1.0):
 
     return np.sum( np.sqrt( np.diff( comx )**2 + np.diff( comy )**2 ) )
 
+def sum_forces(links_forces: np.ndarray, sim_fraction=1.0):
+    ''' Compute the total external forces exerted on the links '''
+
+    # Parameters
+    n_steps            = links_forces.shape[0]
+    n_steps_considered = round(n_steps * sim_fraction)
+
+    # Sum forces across links, compute mean across time
+    total_forces = np.sum(links_forces, axis=1)
+    mean_force   = np.mean(total_forces[-n_steps_considered:], axis=0)
+
+    return mean_force
+
 def sum_torques(joints_torques, sim_fraction=1.0):
     """
     Compute sum of all the exerted active torques
@@ -838,16 +935,23 @@ def sum_torques(joints_torques, sim_fraction=1.0):
 
     return np.sum(np.abs(joints_torques[-n_steps_considered:, :]))
 
-def sum_energy(torques, speeds, timestep, sim_fraction=1.0):
+def sum_powers(
+    joints_powers,
+    timestep,
+    sim_fraction  = 1.0,
+    positive_only = True
+):
     """
-    Compute sum of energy consumptions.
-    Summation in time and across joints
+    Compute sum of all the exerted joint powers
+    Summmation in time and across joints
     """
-    n_steps = torques.shape[0]
-    n_steps_considered = round(n_steps * sim_fraction)
+    n_steps       = joints_powers.shape[0]
+    n_steps       = round(n_steps * sim_fraction)
+    joints_powers = joints_powers[-n_steps:, :]
 
-    #NOTE: Only take positive values (no energy storing of the active part)
-    powers = np.clip( torques * speeds, a_min=0, a_max=None)
-    return np.sum( powers[-n_steps_considered:] ) * timestep
+    if positive_only:
+        joints_powers = np.clip(joints_powers, a_min=0, a_max=None)
+
+    return np.sum(joints_powers) * timestep
 
 ### \------- [ METRICS COMPUTATION ] --------

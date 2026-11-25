@@ -9,16 +9,17 @@ PACKAGEDIR = CURRENTDIR.split('ZebrafishSNN')[0] + 'ZebrafishSNN'
 sys.path.insert(0, CURRENTDIR)
 sys.path.insert(0, PACKAGEDIR)
 
+from network_experiments.snn_paths import RESULTS_PATH
+
 import numpy as np
 
 import muscle_parameters_optimization_sim_params as opt_params
 import muscle_parameters_optimization_runner as opt_runner
 
 # SIMULATION
-RESULTS_PATH = 'simulation_results'
 
 N_JOINTS_AXIS = 15
-DURATION      = 10.0
+DURATION      = 40.0    # 10.0
 TIMESTEP      = 0.001
 PLOTTING      = False
 WATERLESS     = True
@@ -32,8 +33,8 @@ MUSCLE_BASELINE  = 0.0
 MUSCLE_AMPLITUDE = 0.1
 
 # SWEEP FUNCTION
-F_MIN     = 0.0
-F_MAX     = 10.0
+F_MIN     = 0.0    # 0.0
+F_MAX     = 40.0   # 10.0
 FREQ_FUN  = lambda time : F_MIN + (F_MAX - F_MIN) / DURATION * time
 SWEEP_FUN = lambda time : np.sin( 2*np.pi * FREQ_FUN(time) * time )
 
@@ -43,15 +44,15 @@ def main():
     target_G0 = 2 * np.pi/ N_JOINTS_AXIS
     target_Zc = np.array( [1.00] )
     # target_Fn = np.arange(3.0, 5.0, 0.25,)
-    target_Fn = np.arange(10.5, 20.1, 0.5)
+    target_Fn = np.arange(25.0, 100.1, 25)
 
     target_G0_list = np.array( [target_G0] )
     target_Zc_list = target_Zc
     target_Wn_list = target_Fn * 2 * np.pi
 
     # OPTIMIZATION
-    start_iteration = 0
-    n_iterations    = 51 - start_iteration
+    start_iteration = 50
+    n_iterations    = 101 - start_iteration
     rate_beta_arr   = np.linspace(0.3, 0.1, n_iterations)
     rate_delta_arr  = np.linspace(0.3, 0.1, n_iterations)
 

@@ -85,7 +85,8 @@ LINKS_MASSES = np.array(
 LENGTH_AXIS_MODEL      = POINTS_POSITIONS_MODEL[-1]
 JOINTS_POSITIONS_MODEL = POINTS_POSITIONS_MODEL[1:-1]
 LENGTHS_LINKS_MODEL    = np.diff(POINTS_POSITIONS_MODEL)
-COM_POS_MODEL          = np.sum(LINKS_COM_POSITIONS_MODEL * LINKS_MASSES) / np.sum(LINKS_MASSES)
+BODY_MASS_MODEL        = np.sum(LINKS_MASSES)
+COM_POS_MODEL          = np.sum(LINKS_COM_POSITIONS_MODEL * LINKS_MASSES) / BODY_MASS_MODEL
 
 POINTS_POSITIONS_R_MODEL = POINTS_POSITIONS_MODEL / LENGTH_AXIS_MODEL
 JOINTS_POSITIONS_R_MODEL = JOINTS_POSITIONS_MODEL / LENGTH_AXIS_MODEL
@@ -851,7 +852,7 @@ def _sin_fun(
 
 def sig_function_sine_square(
     phases       : np.ndarray,
-    points_list  : list[float] = [ 0.333, 0.666],
+    points_list  : list[float] = [ 0.250, 0.750],
     remove_offset: bool = False,
 ) -> float:
     ''' Sine square function '''

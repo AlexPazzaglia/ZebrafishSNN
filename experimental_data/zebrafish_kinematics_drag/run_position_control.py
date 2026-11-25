@@ -9,6 +9,8 @@ PACKAGEDIR = CURRENTDIR.split('ZebrafishSNN')[0] + 'ZebrafishSNN'
 sys.path.insert(0, CURRENTDIR)
 sys.path.insert(0, PACKAGEDIR)
 
+from network_experiments.snn_paths import RESULTS_PATH
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -23,7 +25,7 @@ N_JOINTS_AXIS = default.N_JOINTS_AXIS
 def main():
     ''' Run the spinal cord model together with the mechanical simulator '''
 
-    results_path             = 'simulation_results'
+    results_path             = RESULTS_PATH
     simulation_data_file_tag = 'matching_kinematics_position_control'
 
     # Default parameters
@@ -145,7 +147,7 @@ def main():
 
 
     # # Plot
-    # plt.plot( metrics_runs['mech_links_disp_amp_bl'][0] )
+    # plt.plot( metrics_runs['mech_points_disp_amp_bl'][0] )
 
     # plt.plot( actual_joints_displ )
     # plt.plot( desired_joints_displ )

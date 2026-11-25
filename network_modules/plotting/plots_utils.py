@@ -89,9 +89,19 @@ def _save_figure(
 
     figname_pre = figure._label.replace(' ', '_').replace('.', 'dot')
     if figname_pre == '':
-        figname_pre = kwargs.pop('fig_label', 'animation')
+        figname_pre = kwargs.pop('fig_label', 'figure')
 
+    # Avoid heavy files, save data-intensive plots as png
+    exclusion_list = ['Raster_plot']
+
+    # Save
     for extension in kwargs.pop('extensions', ['pdf']):
+
+        # Check for exclusion
+        excluded  = any([ exc in figname_pre for exc in exclusion_list ])
+        extension = 'png' if excluded else extension
+
+        # Save
         figname  = f'{figname_pre}.{extension}'
         filename = f'{folder_path}/{figname}'
 

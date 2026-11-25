@@ -347,6 +347,10 @@ class LinkSensorArray(SensorData, LinkSensorArrayCy):
         """CoM position of a link"""
         return self.array[iteration, link_i, sc.link_com_position_x:sc.link_com_position_z+1]
 
+    def com_positions(self) -> NDARRAY_XX3_D:
+        """CoM position of all links"""
+        return self.array[:, :, sc.link_com_position_x:sc.link_com_position_z+1]
+
     def com_orientation(
             self,
             iteration: int,
@@ -355,9 +359,9 @@ class LinkSensorArray(SensorData, LinkSensorArrayCy):
         """CoM orientation of a link"""
         return self.array[iteration, link_i, sc.link_com_orientation_x:sc.link_com_orientation_w+1]
 
-    def com_positions(self) -> NDARRAY_XX3_D:
-        """CoM position of a link"""
-        return self.array[:, :, sc.link_com_position_x:sc.link_com_position_z+1]
+    def com_orientations(self) -> NDARRAY_4_D:
+        """CoM orientation of all links"""
+        return self.array[:, :, sc.link_com_orientation_x:sc.link_com_orientation_w+1]
 
     def urdf_position(
             self,
@@ -402,6 +406,10 @@ class LinkSensorArray(SensorData, LinkSensorArrayCy):
     ) -> NDARRAY_3_D:
         """CoM angular velocity of a link"""
         return self.array[iteration, link_i, sc.link_com_velocity_ang_x:sc.link_com_velocity_ang_z+1]
+
+    def com_ang_velocities(self) -> NDARRAY_3_D:
+        """CoM angular velocities"""
+        return self.array[:, :, sc.link_com_velocity_ang_x:sc.link_com_velocity_ang_z+1]
 
     def global_com_position(self, iteration: int):
         """Global CoM position"""

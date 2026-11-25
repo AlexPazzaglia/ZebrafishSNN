@@ -11,6 +11,8 @@ PACKAGEDIR = CURRENTDIR.split('ZebrafishSNN')[0] + 'ZebrafishSNN'
 sys.path.insert(0, CURRENTDIR)
 sys.path.insert(0, PACKAGEDIR)
 
+from network_experiments.snn_paths import RESULTS_PATH
+
 import numpy as np
 
 from network_experiments.snn_simulation_setup import get_params_processes, get_mech_sim_options
@@ -29,7 +31,7 @@ def main():
     ''' Run the spinal cord model together with the mechanical simulator '''
 
     # SIMULATION
-    results_path = 'simulation_results'
+    results_path = RESULTS_PATH
 
     duration  = 20.0
     timestep  = 0.001

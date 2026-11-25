@@ -400,7 +400,7 @@ class SnnParameters():
         Create a weight matrix to convert joint angles to PS inputs
 
         # Example:
-        points_pos = np.array( [0, 1, 2, 3, 4] )
+        points_pos = np.array( [0, 1, 2, 3, 4] ) --> joints_pos = np.array( [1, 2, 3] )
         ps_pos     = np.array( [0.3, 1.5, 2.5, 0.3, 1.5, 2.5] )
 
         weigth_matrix_joint_angle_to_ps_input = [
@@ -601,6 +601,12 @@ class SnnParameters():
                 prev_pool = self.input_ps_axial_pool_inds[joint]
                 post_pool = self.input_ps_axial_pool_inds[joint+1] if joint < mech_axial_joints-1 else neur_axial_joints
 
+                # Same pool
+                if prev_pool == post_pool:
+                    gains_mapped[prev_pool] = prev_gain
+                    continue
+
+                # Interpolate between pools
                 for pool_id in range(prev_pool, post_pool):
                     gains_mapped[pool_id] = (
                         prev_gain + (pool_id - prev_pool) / (post_pool - prev_pool) * (post_gain - prev_gain)
@@ -623,6 +629,13 @@ class SnnParameters():
                 prev_pool = self.input_ps_axial_pool_inds[joint]
                 post_pool = self.input_ps_axial_pool_inds[joint+1] if joint < mech_axial_joints-1 else neur_axial_joints
 
+                # Same pool
+                if prev_pool == post_pool:
+                    gains_mapped[prev_pool] = prev_gain_l
+                    gains_mapped[neur_axial_joints + prev_pool] = prev_gain_r
+                    continue
+
+                # Interpolate between pools
                 for pool_id in range(prev_pool, post_pool):
                     gains_mapped[pool_id] = (
                         prev_gain_l + (pool_id - prev_pool) / (post_pool - prev_pool) * (post_gain_l - prev_gain_l)
@@ -645,7 +658,7 @@ class SnnParameters():
         # Update
         self.ps_gain_axial_callback = np.repeat(
             ps_gain_axial_pools_sides,
-            repeats = net_module_ps.n_pool  // 2
+            repeats = net_module_ps.n_pool_side
         )
         return
 

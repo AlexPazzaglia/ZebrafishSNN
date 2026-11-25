@@ -249,7 +249,7 @@ def save_prompt(
 def delete_old_files(
     target_folders,
     target_files,
-    max_age_minutes = 5
+    max_age_minutes = 5.0
 ):
     """
     Deletes files in the specified directories if they were created more than max_age_minutes ago.
@@ -265,6 +265,7 @@ def delete_old_files(
 
     print(f'Current time: {datetime.fromtimestamp(now)}')
 
+    deleted_count = 0
     for directory in target_folders:
 
         if not os.path.isdir(directory):
@@ -291,26 +292,54 @@ def delete_old_files(
                 if now - creation_time > max_age_seconds:
                     os.remove(file_path)
                     print(f"Deleted: {file_path}")
+                    deleted_count += 1
+
+    print(f'Total files deleted: {deleted_count}')
+
+    return deleted_count
 
 def start_deletion_schedule(
     target_folders,
     target_files,
-    interval_seconds = 60
+    interval_seconds   = 60,
+    inactivity_minutes = 20.0,
 ):
     """
     Starts a schedule to delete old files.
 
     Args:
-        targed_folders (list of str): List of directory paths to scan.
+        target_folders (list of str): List of directory paths to scan.
         target_files (list of str): List of target files to delete.
     """
-    schedule.every(interval_seconds).seconds.do(
-        delete_old_files,
-        target_folders = target_folders,
-        target_files   = target_files,
-    )
+
+    inactivity_seconds = inactivity_minutes * 60
+    last_deletion_time = time.time()
+
+    # Keep track of successful deletion
+    def deletion_job():
+        nonlocal last_deletion_time
+        deleted_count = delete_old_files(
+            target_folders  = target_folders,
+            target_files    = target_files,
+        )
+        if deleted_count > 0:
+            last_deletion_time = time.time()
+
+    # Schedule the deletion job
+    schedule.every(interval_seconds).seconds.do(deletion_job)
 
     print("Starting scheduled file deletion...")
+    print(f"Target folders: {target_folders}")
+    print(f"Target files: {target_files}")
+
     while True:
+        # Run scheduled jobs
         schedule.run_pending()
-        time.sleep(1)
+
+        # Check for inactivity
+        if time.time() - last_deletion_time > inactivity_seconds:
+            print(f'No deletions in {inactivity_minutes} minutes. Stopping.')
+            break
+
+        # Sleep
+        time.sleep(60)

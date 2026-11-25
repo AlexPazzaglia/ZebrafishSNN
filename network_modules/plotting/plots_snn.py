@@ -900,7 +900,7 @@ def plot_spike_count_cycle_frequencies_evolution(
     n0, n1   = ( n_steps // 10, 9 * n_steps // 10 )
     sig_max  = np.amax(signals[signal_inds, n0:n1], axis=1)
     sig_min  = np.amin(signals[signal_inds, n0:n1], axis=1)
-    sig_prom = 0.33 * (sig_max - sig_min)
+    sig_prom = 0.25 * (sig_max - sig_min)
 
     signal_peaks = [
         find_peaks(signal, prominence=prom)[0]

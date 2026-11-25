@@ -49,7 +49,7 @@ def plot_joints_angles(
 
 def plot_links_displacements(
     times              : np.ndarray,
-    links_displacements: np.ndarray,
+    points_displacements: np.ndarray,
     n_links            : int,
     n_links_groups     : list[int] = None,
     names_groups       : list[str] = None,
@@ -73,11 +73,11 @@ def plot_links_displacements(
 
         figures_joint_disp[f'fig_ld_{name_group}'] = plots_mech._plot_mech_signals(
             times       = times,
-            signals     = links_displacements,
+            signals     = points_displacements,
             ind_min     = ind_min,
             ind_max     = ind_max,
             chain_name  = name_group,
-            signal_name = 'links_displacements',
+            signal_name = 'points_displacements',
         )
 
     return figures_joint_disp

@@ -67,12 +67,12 @@ def save_muscle_parameters_from_multiple_optimization():
     # TARGET PARAMETERS
     target_G0 = 2 * np.pi/ 15
     target_Zc = np.array( [1.00] )
-    target_Fn = np.arange(10.5, 20.1, 0.5)
+    target_Fn = np.array( [25.0, 50.0] )
 
     target_Zc_list = target_Zc
     target_Wn_list = target_Fn * 2 * np.pi
 
-    index_iteration = 50
+    index_iteration = 100
 
     original_alpha = 8.4e-9
     original_beta  = 1.0e-8

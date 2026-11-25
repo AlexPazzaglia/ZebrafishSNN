@@ -299,7 +299,9 @@ class SnnPerformance(SnnSimulation):
 
             (
                 times_f,
-                spike_count_f
+                spike_count_f,
+                times_raw,
+                spike_count_raw,
             ) = SigProc.compute_smooth_activation_module(
                 spikemon_t    = self.spikemon_dict['t'],
                 spikemon_i    = self.spikemon_dict['i'],
@@ -311,12 +313,14 @@ class SnnPerformance(SnnSimulation):
             )
 
             self.smooth_activations[ner_name] = {
-                'times'        : times_f,
-                'time_step'    : times_f[1] - times_f[0],
-                'spike_count'  : spike_count_f,
-                'mod_name'     : mod_name,
-                'ner_name'     : ner_name,
-                'smooth_factor': smooth_factor,
+                'times_raw'      : times_raw,
+                'spike_count_raw': spike_count_raw,
+                'times'          : times_f,
+                'spike_count'    : spike_count_f,
+                'time_step'      : times_f[1] - times_f[0],
+                'mod_name'       : mod_name,
+                'ner_name'       : ner_name,
+                'smooth_factor'  : smooth_factor,
             }
 
         return
@@ -751,6 +755,19 @@ class SnnPerformance(SnnSimulation):
             amp_mc_ax, amp_mc_lb,
             amp_mo_ax, amp_mo_lb,
         )
+
+    def _get_average_firing_rate(
+        self,
+        pop_name: str,
+    ):
+        ''' Compute average firing rate of a population '''
+        n    = self.params.topology.network_modules[pop_name].n_tot
+        t    = self.smooth_activations[pop_name]['times_raw']
+        c    = self.smooth_activations[pop_name]['spike_count_raw']
+        n_sp = np.sum(c)
+        rate = n_sp / n / (t[-1] - t[0])
+        rate = float(rate)
+        return rate
 
     def network_performance_metrics(self, recompute: bool = False) -> tuple[float]:
         ''' Compute metrics to evaluate network's performance '''
